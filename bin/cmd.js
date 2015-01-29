@@ -3,6 +3,7 @@
 var program = require('commander'),
   log = require('loglevel'),
   fs = require('fs'),
+  prompt = require('prompt'),
   _ = require('lodash'),
   packageInfo = require('../package.json');
 
@@ -25,6 +26,7 @@ program
   .option('-w, --write <n>', 'Data to write (string, date, number).')
   .option('-r, --read', 'Reads the data from a board.')
   .option('-t, --token <token>', 'Token to use (Overrides config file).')
+  .option('-t, --server <server>', 'Server to use (Overrides https://datanow.io).')
   .option('-d, --loglevel <level>', 'Set logging level (trace, debug, info, warn, error). Defaults to info.')
   .parse(process.argv);
 
@@ -42,6 +44,7 @@ var config = {
   write: program.write,
   read: program.read,
   token: program.token,
+  server: program.server,
   loglevel: program.loglevel ? program.loglevel : 'info',
 };
 
@@ -67,29 +70,73 @@ var dataNow = new DataNow(config);
 
 var genericResponse = function(err) {
   if (err) {
-    throw err;
+    return genericError(err);
   }
   log.info('Success.');
-}
+};
 
-var actions = [
-  'register',
-  'write',
-  'read',
-  'newApp',
-  'newBoard'
-];
-
-
-var action, found = false;
-for (var i = 0; i < actions.length; i++) {
-  action = actions[i];
-  if (program[action]) {
-    dataNow[action](genericResponse);
-    found = true;
-    break;
+var genericError = function(err) {
+  if (err instanceof Error) {
+    log.error(err.stack);
+  } else {
+    log.error(err);
   }
-}
-if (!found) {
-  log.error('No valid action specified. Please refer to datanow --help');
+  process.exit(1);
+};
+
+if (program.register) {
+  //Ask for username, email and/or password depending on what was supplied
+  prompt.message = '';
+  prompt.delimiter = '';
+  prompt.start();
+  var schema = {
+    properties: {
+
+    }
+  };
+  if (!program.username) {
+    schema.properties.username = {
+      description: 'Enter your username:',
+      required: true,
+      pattern: /^[a-zA-Z0-9]+$/,
+      message: 'Username must be letters or numbers.'
+    };
+  }
+  if (!program.email) {
+    schema.properties.email = {
+      description: 'Enter your email:',
+      required: true,
+      pattern: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      message: 'Must be a valid email address'
+    };
+  }
+  schema.properties.password = {
+    description: 'Enter your password:',
+    hidden: true
+  };
+
+  prompt.get(schema, function(err, result) {
+    if (err) {
+      return genericError(err);
+    }
+    dataNow.register(
+      result.username ? result.username : program.username,
+      result.email ? result.email : program.email,
+      result.password ? result.password : program.password,
+      genericResponse
+    );
+  })
+
+
+
+} else if (program.write) {
+
+} else if (program.read) {
+
+} else if (program.newApp) {
+
+} else if (program.newBoard) {
+
+} else {
+  log.error('No valid action specified. Please refer to `datanow --help`');
 }
