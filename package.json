@@ -1,0 +1,50 @@
+{
+  "name": "datanow",
+  "version": "1.0.0",
+  "description": "DataNow.io's command line tool and node SDK.",
+  "main": "src/index.js",
+  "bin": {
+    "datanow": "bin/cmd.js",
+    "dn": "bin/cmd.js"
+  },
+  "preferGlobal": "true",
+  "scripts": {
+    "test": "mocha tests/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/garrows/datanow-cli.git"
+  },
+  "keywords": [
+    "datanow",
+    "datanow.io",
+    "datanow-io",
+    "data now",
+    "hosted data service",
+    "graphs",
+    "opendata",
+    "data",
+    "streams",
+    "API",
+    "service"
+  ],
+  "author": {
+    "name": "Glen Arrowsmith",
+    "email": "glen.arrowsmith@gmail.com"
+  },
+  "license": "GPL v3.0",
+  "bugs": {
+    "url": "https://github.com/garrows/datanow-cli/issues"
+  },
+  "homepage": "http://datanow.io",
+  "devDependencies": {
+    "mocha": "^2.1.0",
+    "should": "^4.4.2"
+  },
+  "dependencies": {
+    "async": "^0.9.0",
+    "commander": "^2.6.0",
+    "lodash": "^3.0.0",
+    "loglevel": "^1.2.0"
+  }
+}
