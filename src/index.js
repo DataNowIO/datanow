@@ -15,18 +15,29 @@ DataNow.prototype = {
 
   register: function(username, email, password, callback) {
     var self = this;
-    log.debug('register');
+    log.debug('register', self.options.server, username, email, password);
 
-
-
-    callback();
-  },
-
-  write: function(callback) {
-    var self = this;
-    log.debug('write');
-
-    callback();
+    request.post(self.options.server + '/api/user/register', {
+        json: {
+          username: username,
+          email: email,
+          password: password
+        }
+      },
+      function(err, res, body) {
+        if (err) {
+          return callback(err);
+        }
+        if (res.status != 200) {
+          var e = new Error('Unknown server error.');
+          e.message = body && body.error && body.error.message ? body.error.message : e.message;
+          e.status = res.status;
+          return callback(e);
+        }
+        log.debug('Register response', body);
+        callback();
+      }
+    );
   },
 
   write: function(callback) {
