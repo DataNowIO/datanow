@@ -28,13 +28,6 @@ program
   .option('-d, --loglevel <level>', 'Set logging level (trace, debug, info, warn, error). Defaults to info.')
   .parse(process.argv);
 
-var DataNow = require('../src/index.js');
-var options = {};
-
-if (program.loglevel) {
-  log.setLevel(program.loglevel);
-}
-log.debug(program);
 
 var config = {
   register: program.register,
@@ -49,13 +42,16 @@ var config = {
   write: program.write,
   read: program.read,
   token: program.token,
-  loglevel: program.loglevel,
+  loglevel: program.loglevel ? program.loglevel : 'info',
 };
 
+log.setLevel(config.loglevel);
+
+//Attempt to read the config file.
 if (fs.existsSync(config.config)) {
   try {
     var conf = JSON.parse(fs.readFileSync(config.config, 'utf8'));
-    _.merge(conf, program);
+    config = _.merge(config, conf);
     log.debug('Loaded config', conf);
   } catch (e) {
     log.error('Error parsing config file.', e);
@@ -66,10 +62,34 @@ if (fs.existsSync(config.config)) {
   process.exit(1);
 }
 
-var dataNow = new DataNow(options);
-dataNow.write(function(err) {
+var DataNow = require('../src/index.js');
+var dataNow = new DataNow(config);
+
+var genericResponse = function(err) {
   if (err) {
     throw err;
   }
-  log.info('Successfully wrote data.');
-});
+  log.info('Success.');
+}
+
+var actions = [
+  'register',
+  'write',
+  'read',
+  'newApp',
+  'newBoard'
+];
+
+
+var action, found = false;
+for (var i = 0; i < actions.length; i++) {
+  action = actions[i];
+  if (program[action]) {
+    dataNow[action](genericResponse);
+    found = true;
+    break;
+  }
+}
+if (!found) {
+  log.error('No valid action specified. Please refer to datanow --help');
+}
