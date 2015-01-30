@@ -1,19 +1,31 @@
 var async = require('async'),
   log = require('loglevel'),
-  request = require('request'),
+  fs = require('fs'),
+  Request = require('request'),
   path = require('path');
 
+var cookieJar = Request.jar();
+var request = Request.defaults({
+  jar: cookieJar
+});
+
+
 function DataNow(opts) {
+  log.debug('Starting DataNow');
   this.options = opts;
 
   this.options.server = this.options.server ? this.options.server : 'https://datanow.io';
+  if (this.options.token) {
+    log.debug('Using saved token', this.options.token);
+    var cookie = request.cookie('grailed-token=' + this.options.token);
+    cookieJar.setCookie(cookie, this.options.server);
+  }
 
-  log.debug('Created DataNow');
 }
 
 DataNow.prototype = {
 
-  register: function(username, email, password, callback) {
+  register: function(username, email, password, login, callback) {
     var self = this;
     log.debug('register', username, email);
 
@@ -28,8 +40,38 @@ DataNow.prototype = {
         if (self.checkForErrors(err, res, body, callback)) {
           return;
         }
-        log.debug('Register response', body);
-        callback();
+        log.debug('Register body', body);
+        if (login) {
+          return self.login(username, email, password, callback);
+        } else {
+          return callback();
+        }
+      }
+    );
+  },
+
+  login: function(username, email, password, callback) {
+    var self = this;
+    log.debug('login', username, email);
+
+    request.post(self.options.server + '/api/user/login', {
+        json: {
+          username: username,
+          email: email,
+          password: password
+        }
+      },
+      function(err, res, body) {
+        if (self.checkForErrors(err, res, body, callback)) {
+          return;
+        }
+
+        var cookies = cookieJar.getCookieString(self.options.server);
+        // log.debug('login body', body);
+        var re = new RegExp('[; ]grailed-token=([^\\s;]*)');
+        self.options.token = (' ' + cookies).match(re)[1];
+        log.debug('token cookies', self.options.token);
+        self.save(callback);
       }
     );
   },
@@ -119,6 +161,17 @@ DataNow.prototype = {
     }
     return false;
   },
+
+  save: function(callback) {
+    var self = this;
+    var json = JSON.stringify(self.options);
+    fs.writeFile(self.options.config, json, {
+      flag: 'w+'
+    }, function(err) {
+      log.debug('done writing config', self.options.config, err);
+      callback(err);
+    });
+  }
 
 
 }

@@ -17,10 +17,10 @@ Open a command line and run the following command to install. Requires [node.js]
 Register using the command below substituting in your username and email.
 
 ```
-datanow --register --username garrows --email glen@datanow.io
+datanow --register --username garrows --email glen@datanow.io --login
 ```
 
-Enter your password when prompted. An authorization token has been generated and placed in `~/.datanow/config.json`. You will need to __click the verification link that was sent to your email__ before proceeding.
+Enter your password when prompted. An authorization token has been generated and placed in `~/.datanow-config.json`. You will need to __click the verification link that was sent to your email__ before proceeding.
 
 
 ## Simple Example

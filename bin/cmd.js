@@ -18,7 +18,7 @@ program
   .option('-l, --login', 'Logs in user. Requires username and email. Can be used with register.')
   .option('-u, --username <username>', 'User\'s desired username.')
   .option('-e, --email <email>', 'User\'s email address.')
-  .option('-c, --config <path>', 'Path to custom config file. Defaults to ~/.datanow/config.json')
+  .option('-c, --config <path>', 'Path to custom config file. Defaults to ~/.datanow-config.json')
   .option('-a, --app <app name>', 'Specifies app to use. Defaults to username.')
   .option('-b, --board <board name>', 'Specifies board to use.')
   .option('-A, --newApp <app name>', 'Creates a new app.')
@@ -37,7 +37,7 @@ var config = {
   register: program.register,
   username: program.username,
   email: program.email,
-  config: program.config ? program.config : '~/.datanow/config.json',
+  config: program.config ? program.config : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + '/.datanow-config.json',
   app: program.app,
   board: program.board,
   newApp: program.newApp,
@@ -63,9 +63,6 @@ if (fs.existsSync(config.config)) {
     log.error('Error parsing config file.', e);
     process.exit(1);
   }
-} else if (program.config) {
-  log.error('Config file not found.');
-  process.exit(1);
 }
 
 var DataNow = require('../src/index.js');

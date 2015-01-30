@@ -59,8 +59,8 @@ describe('DataNow', function() {
       });
     });
 
-    it('should register', function(testsDone) {
-      dataNow.register(username, email, password, function(err) {
+    it('should register and login', function(testsDone) {
+      dataNow.register(username, email, password, true, function(err) {
         should(err).not.exist;
         testsDone(err);
       });
