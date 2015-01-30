@@ -46,7 +46,6 @@ var config = {
   write: program.write,
   read: program.read,
   token: program.token,
-  password: program.password,
   server: program.server,
   loglevel: program.loglevel ? program.loglevel : 'info',
 };
@@ -150,20 +149,20 @@ if (program.register || program.login) {
 
 
 
-} else if (program.write) {
+} else if (typeof program.write !== 'undefined') {
   program.app = program.app ? program.app : config.username;
-  required(['app', 'board', 'data'], program);
+  required(['app', 'board'], program);
   dataNow.write(
     program.app,
     program.board,
-    program.data,
+    program.write,
     genericResponse
   );
 
 } else if (program.read) {
   program.app = program.app ? program.app : config.username;
   required(['app', 'board'], program);
-  dataNow.newBoard(
+  dataNow.read(
     program.app,
     program.board,
     genericResponse

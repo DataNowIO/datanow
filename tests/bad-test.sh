@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -e -o verbose
 
 mongo DataNow --eval "db.dropDatabase()" > /dev/null
 
@@ -10,4 +10,10 @@ node $MY_PATH/../bin/cmd.js --server http://localhost:3000  --loglevel debug --r
 
 node $MY_PATH/../bin/cmd.js --server http://localhost:3000  --loglevel debug --newApp testApp
 
-# node $MY_PATH/../bin/cmd.js --server http://localhost:3000 --loglevel debug --newBoard testBoard --app testApp
+node $MY_PATH/../bin/cmd.js --server http://localhost:3000 --loglevel debug --newBoard testBoard --app testApp
+
+node $MY_PATH/../bin/cmd.js --server http://localhost:3000 --loglevel debug --app testApp --board testBoard --write 1
+node $MY_PATH/../bin/cmd.js --server http://localhost:3000 --loglevel debug --app testApp --board testBoard --write 2
+node $MY_PATH/../bin/cmd.js --server http://localhost:3000 --loglevel debug --app testApp --board testBoard --write 3
+
+node $MY_PATH/../bin/cmd.js --server http://localhost:3000 --loglevel debug --app testApp --board testBoard --read
