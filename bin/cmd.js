@@ -15,6 +15,7 @@ function range(val) {
 program
   .version(packageInfo.version)
   .option('-R, --register', 'Registers user. Requires username and email.')
+  .option('-l, --login', 'Logs in user. Requires username and email. Can be used with register.')
   .option('-u, --username <username>', 'User\'s desired username.')
   .option('-e, --email <email>', 'User\'s email address.')
   .option('-c, --config <path>', 'Path to custom config file. Defaults to ~/.datanow/config.json')
@@ -26,6 +27,7 @@ program
   .option('-w, --write <n>', 'Data to write (string, date, number).')
   .option('-r, --read', 'Reads the data from a board.')
   .option('-t, --token <token>', 'Token to use (Overrides config file).')
+  .option('-p, --password <password>', 'User\'s password.')
   .option('-t, --server <server>', 'Server to use (Overrides https://datanow.io).')
   .option('-d, --loglevel <level>', 'Set logging level (trace, debug, info, warn, error). Defaults to info.')
   .parse(process.argv);
@@ -44,6 +46,7 @@ var config = {
   write: program.write,
   read: program.read,
   token: program.token,
+  password: program.password,
   server: program.server,
   loglevel: program.loglevel ? program.loglevel : 'info',
 };
@@ -84,7 +87,15 @@ var genericError = function(err) {
   process.exit(1);
 };
 
-if (program.register) {
+var required = function(required, config) {
+  for (var i = 0; i < required.length; i++) {
+    if (config[required[i]] === undefined) {
+      genericError('Missing required parameter: ' + required[i] + '.');
+    }
+  }
+};
+
+if (program.register || program.login) {
   //Ask for username, email and/or password depending on what was supplied
   prompt.message = '';
   prompt.delimiter = '';
@@ -110,33 +121,70 @@ if (program.register) {
       message: 'Must be a valid email address'
     };
   }
-  schema.properties.password = {
-    description: 'Enter your password:',
-    hidden: true
-  };
+  if (!program.password) {
+    schema.properties.password = {
+      description: 'Enter your password:',
+      hidden: true
+    };
+  }
+
 
   prompt.get(schema, function(err, result) {
     if (err) {
       return genericError(err);
     }
-    dataNow.register(
-      result.username ? result.username : program.username,
-      result.email ? result.email : program.email,
-      result.password ? result.password : program.password,
-      genericResponse
-    );
+    if (program.register) {
+      dataNow.register(
+        result.username ? result.username : program.username,
+        result.email ? result.email : program.email,
+        result.password ? result.password : program.password,
+        program.login,
+        genericResponse
+      );
+    } else {
+      dataNow.login(
+        result.username ? result.username : program.username,
+        result.email ? result.email : program.email,
+        result.password ? result.password : program.password,
+        genericResponse
+      );
+    }
   })
 
 
 
 } else if (program.write) {
+  program.app = program.app ? program.app : config.username;
+  required(['app', 'board', 'data'], program);
+  dataNow.write(
+    program.app,
+    program.board,
+    program.data,
+    genericResponse
+  );
 
 } else if (program.read) {
+  program.app = program.app ? program.app : config.username;
+  required(['app', 'board'], program);
+  dataNow.newBoard(
+    program.app,
+    program.board,
+    genericResponse
+  );
 
 } else if (program.newApp) {
-
+  dataNow.newApp(
+    program.newApp,
+    genericResponse
+  );
 } else if (program.newBoard) {
-
+  program.app = program.app ? program.app : config.username;
+  required(['app'], program);
+  dataNow.newBoard(
+    program.app,
+    program.newBoard,
+    genericResponse
+  );
 } else {
   log.error('No valid action specified. Please refer to `datanow --help`');
 }
