@@ -46,6 +46,7 @@
     "commander": "^2.6.0",
     "lodash": "^3.0.0",
     "loglevel": "^1.2.0",
+    "nock": "^0.58.0",
     "prompt": "^0.2.14",
     "request": "^2.51.0"
   }

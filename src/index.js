@@ -15,7 +15,7 @@ DataNow.prototype = {
 
   register: function(username, email, password, callback) {
     var self = this;
-    log.debug('register', self.options.server, username, email, password);
+    log.debug('register', username, email);
 
     request.post(self.options.server + '/api/user/register', {
         json: {
@@ -25,14 +25,8 @@ DataNow.prototype = {
         }
       },
       function(err, res, body) {
-        if (err) {
-          return callback(err);
-        }
-        if (res.status != 200) {
-          var e = new Error('Unknown server error.');
-          e.message = body && body.error && body.error.message ? body.error.message : e.message;
-          e.status = res.status;
-          return callback(e);
+        if (self.checkForErrors(err, res, body, callback)) {
+          return;
         }
         log.debug('Register response', body);
         callback();
@@ -40,32 +34,90 @@ DataNow.prototype = {
     );
   },
 
-  write: function(callback) {
+  write: function(appName, boardName, data, callback) {
     var self = this;
-    log.debug('write');
+    log.debug('write', appName, boardName);
 
-    callback();
+    request.post(self.options.server + '/api/app/' + appName + '/board/' + boardName + '/data', {
+        json: {
+          value: data
+        }
+      },
+      function(err, res, body) {
+        if (self.checkForErrors(err, res, body, callback)) {
+          return;
+        }
+        log.debug('write response', body);
+        callback();
+      }
+    );
   },
 
-  read: function(callback) {
+  read: function(appName, boardName, callback) {
     var self = this;
-    log.debug('read');
+    log.debug('read', appName, boardName);
 
-    callback();
+    request.get(self.options.server + '/api/app/' + appName + '/board/' + boardName + '/data', {
+        json: {}
+      },
+      function(err, res, body) {
+        if (self.checkForErrors(err, res, body, callback)) {
+          return;
+        }
+        log.debug('read response', body);
+        callback(null, body.data);
+      }
+    );
   },
 
-  newApp: function(callback) {
+  newApp: function(appName, callback) {
     var self = this;
-    log.debug('newApp');
+    log.debug('newApp', appName);
 
-    callback();
+    request.put(self.options.server + '/api/app/' + appName, {
+        json: {}
+      },
+      function(err, res, body) {
+        if (self.checkForErrors(err, res, body, callback)) {
+          return;
+        }
+        log.debug('newApp response', body);
+        callback();
+      }
+    );
   },
 
-  newBoard: function(callback) {
+  newBoard: function(appName, boardName, callback) {
     var self = this;
-    log.debug('newBoard');
+    log.debug('newBoard', appName);
 
-    callback();
+    request.put(self.options.server + '/api/app/' + appName + '/board/' + boardName, {
+        json: {}
+      },
+      function(err, res, body) {
+        if (self.checkForErrors(err, res, body, callback)) {
+          return;
+        }
+        log.debug('newBoard response', body);
+        callback();
+      }
+    );
+  },
+
+  checkForErrors: function(err, res, body, callback) {
+    var self = this;
+    if (err) {
+      callback(err);
+      return true;
+    }
+    if (res.statusCode != 200) {
+      var e = new Error('Unknown server error.');
+      e.message = body && body.error && body.error.message ? body.error.message : e.message;
+      e.status = res.status;
+      callback(e);
+      return true;
+    }
+    return false;
   },
 
 
