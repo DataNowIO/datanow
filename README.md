@@ -25,21 +25,23 @@ Enter your password when prompted. An authorization token has been generated and
 
 ## Simple Example
 
-First create a board to post your data to.
+First create an app and a board to post your data to.
 ```
-datanow --newBoard test-board
+datanow create test-app
+datanow create test-app/test-board
+datanow use test-app/test-board
 ```
 
 Now post some numbers to it.
 ```
-datanow --board test-board --write 1
-datanow --board test-board --write 2
-datanow --board test-board --write 3
+datanow write 1
+datanow write 2
+datanow write 3
 ```
 
 Let's get those numbers back.
 ```
-datanow --board test-board --read
+datanow read
 # prints  
 # [
 #   [ '2015-01-29T10:01:06.382Z', 1 ],
