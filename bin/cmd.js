@@ -12,7 +12,7 @@ program
   .option('-c, --config <path>', 'Path to custom config file. Defaults to ~/.datanow-config.json')
   .option('-t, --token <token>', 'Token to use (Overrides config file).')
   .option('-t, --server <server>', 'Server to use (Overrides https://datanow.io).')
-  .option('-d, --loglevel <level>', 'Set logging level (trace, debug, info, warn, error). Defaults to info.')
+  .option('-l, --loglevel <level>', 'Set logging level (trace, debug, info, warn, error). Defaults to info.')
 
 
 var config = {};
@@ -32,7 +32,7 @@ program
   .option('-u, --username <username>', 'User\'s desired username.')
   .option('-e, --email <email>', 'User\'s email address.')
   .option('-p, --password <password>', 'User\'s password.')
-  .option('-l, --noLogin', 'Stops the automatic login after registration.')
+  .option('-L, --noLogin', 'Stops the automatic login after registration.')
   .action(function(options) {
 
     setParentConfig(options.parent, config);
@@ -93,9 +93,10 @@ program
 
 
 program
-  .command('create <app/board>')
-  .description('create a app or board. (e.g. datanow create testApp/testBoard)')
-  .action(function(appOrBoard, options) {
+  .command('create <app/board> [schema-type...]')
+  .description('create a app or board. (e.g. datanow create testApp/testBoard date number)')
+  .option('-U, --dontUse', 'Don\'t automatically use the new board.')
+  .action(function(appOrBoard, schema, options) {
 
     setParentConfig(options.parent, config);
 
@@ -105,6 +106,11 @@ program
     var isApp = splitIndex === -1;
 
     if (isApp) {
+
+      if (schema.length > 0) {
+        return helper.genericError('Applications don\'t have a schema.');
+      }
+
       dataNow.newApp(
         appOrBoard,
         helper.genericResponse
@@ -117,8 +123,17 @@ program
       dataNow.newBoard(
         app,
         board,
+        schema.length > 0 ? schema : null,
         helper.genericResponse
       );
+
+      if (typeof options.dontUse == 'undefined') {
+        dataNow.use(
+          app,
+          board,
+          function() {}
+        );
+      }
     }
   });
 

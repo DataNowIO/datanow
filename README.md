@@ -64,3 +64,33 @@ datanow write 2014-12-28T13:27:48.000Z 4
 datanow write 2014-12-29 5
 #   reads out as [ '2014-12-29T00:00:00.000Z', 5 ]
 ```
+
+
+## Custom Schemas
+
+You can specify your own schema when you create a board. Valid data types are `date`, `number` and `string`. Here are some examples.
+
+String only
+```
+datanow create test-app/messages string
+datanow write hello
+datanow write world
+datanow write 'goodbye world'
+datanow read
+# Prints
+#   [ 'hello', 'world', 'goodbye world' ]
+```
+
+Date, Number and String
+```
+datanow create test-app/weights date number string
+datanow use test-app/weights
+datanow write `date -u +"%Y-%m-%dT%H:%M:%SZ"` 130 Homer
+datanow write `date -u +"%Y-%m-%dT%H:%M:%SZ"` 45 Bart
+datanow read
+# Prints
+#   [
+#      [ '2015-02-02T14:12:45.000Z', 130, 'Homer' ],
+#      [ '2015-02-02T14:12:51.000Z', 45, 'Bart' ]
+#   ]
+```

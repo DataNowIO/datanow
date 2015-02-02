@@ -158,12 +158,16 @@ DataNow.prototype = {
     );
   },
 
-  newBoard: function(appName, boardName, callback) {
+  newBoard: function(appName, boardName, schema, callback) {
     var self = this;
     log.debug('newBoard', appName);
 
+    var options = {};
+    if (schema) {
+      options.schema = schema;
+    }
     request.put(self.options.server + '/api/app/' + appName + '/board/' + boardName, {
-        json: {}
+        json: options
       },
       function(err, res, body) {
         if (self.checkForErrors(err, res, body, callback)) {
