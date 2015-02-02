@@ -126,12 +126,14 @@ program
 
 
 program
-  .command('write <data>')
+  .command('write <data> [moreData...]')
   .description('Write data to a board (string, date, number).')
   .option('-b, --board <app/board>', 'Override the current board.')
-  .action(function(data, options) {
+  .action(function(data, moreData, options) {
 
     setParentConfig(options.parent, config);
+
+    moreData.splice(0, 0, data);
 
     var dataNow = new DataNow(config);
 
@@ -148,11 +150,11 @@ program
       dataNow.write(
         app,
         board,
-        data,
+        moreData,
         helper.genericResponse
       );
     } else {
-      dataNow.write(data, helper.genericResponse);
+      dataNow.write(moreData, helper.genericResponse);
     }
 
 

@@ -104,7 +104,7 @@ DataNow.prototype = {
 
     request.post(self.options.server + '/api/app/' + appName + '/board/' + boardName + '/data', {
         json: {
-          value: data
+          values: data
         }
       },
       function(err, res, body) {

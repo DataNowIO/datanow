@@ -6,8 +6,8 @@ MY_PATH="`dirname \"$0\"`"
 
 rm -f ~/.datanow-config.json
 
-DataNow="node $MY_PATH/../bin/cmd.js --server http://localhost:3000  --loglevel debug"
-# DataNow="node $MY_PATH/../bin/cmd.js --server http://localhost:3000"
+# DataNow="node $MY_PATH/../bin/cmd.js --server http://localhost:3000  --loglevel debug"
+DataNow="node $MY_PATH/../bin/cmd.js --server http://localhost:3000"
 
 
 
@@ -26,7 +26,7 @@ $DataNow write 1
 $DataNow use testApp2/testBoard2
 $DataNow write 9
 $DataNow write --board testApp/testBoard 2
-$DataNow write --board testApp2/testBoard2 8
+$DataNow write `date -u +"%Y-%m-%dT%H:%M:%SZ"` 8
 $DataNow write --board testApp/testBoard 3
 $DataNow write --board testApp2/testBoard2 7
 
