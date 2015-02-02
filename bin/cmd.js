@@ -133,6 +133,8 @@ program
 
     setParentConfig(options.parent, config);
 
+    var dataNow = new DataNow(config);
+
     //TODO: Remove duplicate code
     var app, board;
     if (options.board) {
@@ -142,16 +144,18 @@ program
       var split = options.board.split('/');
       app = split[0];
       board = split[1];
+
+      dataNow.write(
+        app,
+        board,
+        data,
+        helper.genericResponse
+      );
+    } else {
+      dataNow.write(data, helper.genericResponse);
     }
 
-    var dataNow = new DataNow(config);
 
-    dataNow.write(
-      app,
-      board,
-      data,
-      helper.genericResponse
-    );
   });
 
 
@@ -163,6 +167,15 @@ program
 
     setParentConfig(options.parent, config);
 
+    var dataNow = new DataNow(config);
+
+    var dataResponse = function(err, data) {
+      if (err) {
+        return helper.genericError(err);
+      }
+      log.info(data);
+    }
+
     //TODO: Remove duplicate code
     var app, board;
     if (options.board) {
@@ -172,15 +185,20 @@ program
       var split = options.board.split('/');
       app = split[0];
       board = split[1];
+
+      dataNow.read(
+        app,
+        board,
+        dataResponse
+      );
+    } else {
+      dataNow.read(
+        dataResponse
+      );
     }
 
-    var dataNow = new DataNow(config);
 
-    dataNow.read(
-      app,
-      board,
-      helper.genericResponse
-    );
+
   });
 
 
@@ -188,17 +206,17 @@ program
 program
   .command('use <app/board>')
   .description('Set the current board.')
-  .action(function(options) {
+  .action(function(boardNamespace, options) {
 
     setParentConfig(options.parent, config);
 
     //TODO: Remove duplicate code
     var app, board;
-    if (options.board) {
-      if (options.board.indexOf('/') === -1) {
+    if (boardNamespace) {
+      if (boardNamespace.indexOf('/') === -1) {
         return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
       }
-      var split = options.board.split('/');
+      var split = boardNamespace.split('/');
       app = split[0];
       board = split[1];
     }

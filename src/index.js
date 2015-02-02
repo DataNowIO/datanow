@@ -94,6 +94,14 @@ DataNow.prototype = {
     var self = this;
     log.debug('write', appName, boardName);
 
+    //appName and boardName are optionals. Handling it.
+    if (arguments.length == 2) {
+      data = appName;
+      callback = boardName;
+      appName = self.options.currentApp;
+      boardName = self.options.currentBoard;
+    }
+
     request.post(self.options.server + '/api/app/' + appName + '/board/' + boardName + '/data', {
         json: {
           value: data
@@ -112,6 +120,13 @@ DataNow.prototype = {
   read: function(appName, boardName, callback) {
     var self = this;
     log.debug('read', appName, boardName);
+
+    //appName and boardName are optionals. Handling it.
+    if (arguments.length == 1) {
+      callback = appName;
+      appName = self.options.currentApp;
+      boardName = self.options.currentBoard;
+    }
 
     request.get(self.options.server + '/api/app/' + appName + '/board/' + boardName + '/data', {
         json: {}
@@ -160,6 +175,25 @@ DataNow.prototype = {
     );
   },
 
+  use: function(appName, boardName, callback) {
+    var self = this;
+
+    var needSave = false;
+
+    if (appName != self.options.currentApp) {
+      self.options.currentApp = appName;
+      needSave = true;
+    }
+    if (boardName != self.options.currentBoard) {
+      self.options.currentBoard = boardName;
+      needSave = true;
+    }
+
+    if (needSave) {
+      return self.save(callback);
+    }
+  },
+
   checkForErrors: function(err, res, body, callback) {
     var self = this;
     if (err) {
@@ -183,7 +217,7 @@ DataNow.prototype = {
       flag: 'w+'
     }, function(err) {
       log.debug('done writing config', self.options.config, err);
-      callback(err);
+      typeof callback == 'function' && callback(err);
     });
   }
 
