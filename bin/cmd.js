@@ -2,185 +2,216 @@
 
 var program = require('commander'),
   log = require('loglevel'),
-  fs = require('fs'),
-  prompt = require('prompt'),
-  _ = require('lodash'),
+  helper = require('./helper.js'),
+  DataNow = require('../src/index.js'),
   packageInfo = require('../package.json');
-
-function range(val) {
-  return val.split(',').map(String);
-}
 
 
 program
   .version(packageInfo.version)
-  .option('-R, --register', 'Registers user. Requires username and email.')
-  .option('-l, --login', 'Logs in user. Requires username and email. Can be used with register.')
-  .option('-u, --username <username>', 'User\'s desired username.')
-  .option('-e, --email <email>', 'User\'s email address.')
   .option('-c, --config <path>', 'Path to custom config file. Defaults to ~/.datanow-config.json')
-  .option('-a, --app <app name>', 'Specifies app to use. Defaults to username.')
-  .option('-b, --board <board name>', 'Specifies board to use.')
-  .option('-A, --newApp <app name>', 'Creates a new app.')
-  .option('-B, --newBoard <board name>', 'Creates a new data board.')
-  .option('-s, --schema <a>,<b>', 'Specifies the board\'s schema (e.g. date,number,string)', range)
-  .option('-w, --write <n>', 'Data to write (string, date, number).')
-  .option('-r, --read', 'Reads the data from a board.')
   .option('-t, --token <token>', 'Token to use (Overrides config file).')
-  .option('-p, --password <password>', 'User\'s password.')
   .option('-t, --server <server>', 'Server to use (Overrides https://datanow.io).')
   .option('-d, --loglevel <level>', 'Set logging level (trace, debug, info, warn, error). Defaults to info.')
-  .parse(process.argv);
 
 
-var config = {
-  register: program.register,
-  username: program.username,
-  email: program.email,
-  config: program.config ? program.config : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + '/.datanow-config.json',
-  app: program.app,
-  board: program.board,
-  newApp: program.newApp,
-  newBoard: program.newBoard,
-  schema: program.schema,
-  write: program.write,
-  read: program.read,
-  token: program.token,
-  server: program.server,
-  loglevel: program.loglevel ? program.loglevel : 'info',
-};
+var config = {};
 
-log.setLevel(config.loglevel);
+function setParentConfig(program, config) {
+  config.config = program.config;
+  config.token = program.token;
+  config.server = program.server;
+  config.loglevel = program.loglevel ? program.loglevel : 'info';
 
-//Attempt to read the config file.
-if (fs.existsSync(config.config)) {
-  try {
-    var conf = JSON.parse(fs.readFileSync(config.config, 'utf8'));
-    config = _.merge(config, conf);
-    log.debug('Loaded config', conf);
-  } catch (e) {
-    log.error('Error parsing config file.', e);
-    process.exit(1);
-  }
+  log.setLevel(config.loglevel);
 }
 
-var DataNow = require('../src/index.js');
-var dataNow = new DataNow(config);
+program
+  .command('register')
+  .description('register an account with datanow.io')
+  .option('-u, --username <username>', 'User\'s desired username.')
+  .option('-e, --email <email>', 'User\'s email address.')
+  .option('-p, --password <password>', 'User\'s password.')
+  .option('-l, --noLogin', 'Stops the automatic login after registration.')
+  .action(function(options) {
 
-var genericResponse = function(err) {
-  if (err) {
-    return genericError(err);
-  }
-  log.info('Success.');
-};
+    setParentConfig(options.parent, config);
 
-var genericError = function(err) {
-  if (err instanceof Error) {
-    log.error(err.stack);
-  } else {
-    log.error(err);
-  }
-  process.exit(1);
-};
+    config.username = options.username;
+    config.email = options.email;
+    config.password = options.password;
+    config.login = !options.noLogin;
 
-var required = function(required, config) {
-  for (var i = 0; i < required.length; i++) {
-    if (config[required[i]] === undefined) {
-      genericError('Missing required parameter: ' + required[i] + '.');
-    }
-  }
-};
+    var dataNow = new DataNow(config);
 
-if (program.register || program.login) {
-  //Ask for username, email and/or password depending on what was supplied
-  prompt.message = '';
-  prompt.delimiter = '';
-  prompt.start();
-  var schema = {
-    properties: {
-
-    }
-  };
-  if (!program.username) {
-    schema.properties.username = {
-      description: 'Enter your username:',
-      required: true,
-      pattern: /^[a-zA-Z0-9]+$/,
-      message: 'Username must be letters or numbers.'
-    };
-  }
-  if (!program.email) {
-    schema.properties.email = {
-      description: 'Enter your email:',
-      required: true,
-      pattern: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-      message: 'Must be a valid email address'
-    };
-  }
-  if (!program.password) {
-    schema.properties.password = {
-      description: 'Enter your password:',
-      hidden: true
-    };
-  }
-
-
-  prompt.get(schema, function(err, result) {
-    if (err) {
-      return genericError(err);
-    }
-    if (program.register) {
+    helper.promptMissingCredentials(config, true, function(err, result) {
+      if (err) {
+        return helper.genericError(err);
+      }
       dataNow.register(
-        result.username ? result.username : program.username,
-        result.email ? result.email : program.email,
-        result.password ? result.password : program.password,
+        result.username,
+        result.email,
+        result.password,
         program.login,
-        genericResponse
+        helper.genericResponse
+      );
+    });
+  });
+
+
+
+program
+  .command('login')
+  .description('login to datanow.io')
+  .option('-u, --username <username>', 'User\'s desired username.')
+  .option('-e, --email <email>', 'User\'s email address.')
+  .option('-p, --password <password>', 'User\'s password.')
+  .action(function(options) {
+
+    setParentConfig(options.parent, config);
+
+    config.username = options.username;
+    config.email = options.email;
+    config.password = options.password;
+
+    var dataNow = new DataNow(config);
+
+    //TODO: only require username or email
+    helper.promptMissingCredentials(config, true, function(err, result) {
+      if (err) {
+        return helper.genericError(err);
+      }
+      dataNow.login(
+        result.username,
+        result.email,
+        result.password,
+        helper.genericResponse
+      );
+    });
+  });
+
+
+
+program
+  .command('create <app/board>')
+  .description('create a app or board. (e.g. datanow create testApp/testBoard)')
+  .action(function(appOrBoard, options) {
+
+    setParentConfig(options.parent, config);
+
+    var dataNow = new DataNow(config);
+
+    var splitIndex = appOrBoard.indexOf('/');
+    var isApp = splitIndex === -1;
+
+    if (isApp) {
+      dataNow.newApp(
+        appOrBoard,
+        helper.genericResponse
       );
     } else {
-      dataNow.login(
-        result.username ? result.username : program.username,
-        result.email ? result.email : program.email,
-        result.password ? result.password : program.password,
-        genericResponse
+      var split = appOrBoard.split('/');
+      var app = split[0];
+      var board = split[1];
+
+      dataNow.newBoard(
+        app,
+        board,
+        helper.genericResponse
       );
     }
-  })
+  });
 
 
 
-} else if (typeof program.write !== 'undefined') {
-  program.app = program.app ? program.app : config.username;
-  required(['app', 'board'], program);
-  dataNow.write(
-    program.app,
-    program.board,
-    program.write,
-    genericResponse
-  );
 
-} else if (program.read) {
-  program.app = program.app ? program.app : config.username;
-  required(['app', 'board'], program);
-  dataNow.read(
-    program.app,
-    program.board,
-    genericResponse
-  );
+program
+  .command('write <data>')
+  .description('Write data to a board (string, date, number).')
+  .option('-b, --board <app/board>', 'Override the current board.')
+  .action(function(data, options) {
 
-} else if (program.newApp) {
-  dataNow.newApp(
-    program.newApp,
-    genericResponse
-  );
-} else if (program.newBoard) {
-  program.app = program.app ? program.app : config.username;
-  required(['app'], program);
-  dataNow.newBoard(
-    program.app,
-    program.newBoard,
-    genericResponse
-  );
-} else {
-  log.error('No valid action specified. Please refer to `datanow --help`');
-}
+    setParentConfig(options.parent, config);
+
+    //TODO: Remove duplicate code
+    var app, board;
+    if (options.board) {
+      if (options.board.indexOf('/') === -1) {
+        return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
+      }
+      var split = options.board.split('/');
+      app = split[0];
+      board = split[1];
+    }
+
+    var dataNow = new DataNow(config);
+
+    dataNow.write(
+      app,
+      board,
+      data,
+      helper.genericResponse
+    );
+  });
+
+
+program
+  .command('read')
+  .description('Read data from a board.')
+  .option('-b, --board <app/board>', 'Override the current board.')
+  .action(function(options) {
+
+    setParentConfig(options.parent, config);
+
+    //TODO: Remove duplicate code
+    var app, board;
+    if (options.board) {
+      if (options.board.indexOf('/') === -1) {
+        return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
+      }
+      var split = options.board.split('/');
+      app = split[0];
+      board = split[1];
+    }
+
+    var dataNow = new DataNow(config);
+
+    dataNow.read(
+      app,
+      board,
+      helper.genericResponse
+    );
+  });
+
+
+
+program
+  .command('use <app/board>')
+  .description('Set the current board.')
+  .action(function(options) {
+
+    setParentConfig(options.parent, config);
+
+    //TODO: Remove duplicate code
+    var app, board;
+    if (options.board) {
+      if (options.board.indexOf('/') === -1) {
+        return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
+      }
+      var split = options.board.split('/');
+      app = split[0];
+      board = split[1];
+    }
+
+    var dataNow = new DataNow(config);
+
+    dataNow.use(
+      app,
+      board,
+      helper.genericResponse
+    );
+  });
+
+
+
+program.parse(process.argv);

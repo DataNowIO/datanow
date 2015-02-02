@@ -8,7 +8,11 @@ rm -f ~/.datanow-config.json
 
 DataNow = "node $MY_PATH/../bin/cmd.js --server http://localhost:3000  --loglevel debug"
 
-$DataNow --register --username garrows --email glen.arrowsmith@gmail.com --password g --login
+
+
+
+$DataNow --register --username garrows --email glen.arrowsmith@gmail.com --password g
+$DataNow --login --username garrows --email glen.arrowsmith@gmail.com --password g
 
 $DataNow --newApp testApp
 

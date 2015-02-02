@@ -1,6 +1,7 @@
 var async = require('async'),
   log = require('loglevel'),
   fs = require('fs'),
+  _ = require('lodash'),
   Request = require('request'),
   path = require('path');
 
@@ -13,6 +14,19 @@ var request = Request.defaults({
 function DataNow(opts) {
   log.debug('Starting DataNow');
   this.options = opts;
+
+  //Attempt to read the config file.
+  this.options.config = this.options.config ? this.options.config : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + '/.datanow-config.json';
+  if (fs.existsSync(this.options.config)) {
+    try {
+      var conf = JSON.parse(fs.readFileSync(this.options.config, 'utf8'));
+      config = _.merge(this.options, conf);
+      log.debug('Loaded config', conf);
+    } catch (e) {
+      log.error('Error parsing config file.', e);
+      process.exit(1);
+    }
+  }
 
   this.options.server = this.options.server ? this.options.server : 'https://datanow.io';
   if (this.options.token) {
