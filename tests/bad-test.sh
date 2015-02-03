@@ -9,7 +9,7 @@ rm -f ~/.datanow-config.json
 npm link
 
 datanow set --server http://localhost:3000
-datanow set --loglevel debug
+# datanow set --loglevel debug
 
 
 
@@ -35,12 +35,12 @@ datanow write --board testApp2/testBoard2 7
 
 datanow create testApp3
 datanow create testApp3/testBoard3 number number string date
-datanow use --board testApp3/testBoard3
+datanow set --board testApp3/testBoard3
 
 datanow write 1 2 chicken `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 datanow write 3 4 duck `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 
-datanow use --board testApp/testBoard
+datanow set --board testApp/testBoard
 datanow read
 datanow read --board testApp2/testBoard2
 datanow read --board testApp3/testBoard3

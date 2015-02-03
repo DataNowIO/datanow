@@ -19,13 +19,10 @@ program
 var config = {};
 
 function setParentConfig(program, config) {
-
   config.config = program && program.config ? program.config : config.config;
   config.token = program && program.token ? program.token : config.token;
   config.server = program && program.server ? program.server : config.server;
   config.loglevel = program && program.loglevel ? program.loglevel : config.loglevel;
-  // config.loglevel = program&&  program.loglevel ? program.loglevel : (config.loglevel ? config.loglevel : 'info');
-  config.loglevel = program && program.loglevel ? program.loglevel : (config.loglevel ? config.loglevel : 'info');
 
   log.setLevel(config.loglevel ? config.loglevel : 'info');
 }
@@ -236,6 +233,14 @@ program
 
     setParentConfig(options.parent, config);
 
+    var newConfig = {
+      board: options.board,
+      config: options.parent.config,
+      token: options.parent.token,
+      server: options.parent.server,
+      loglevel: options.parent.loglevel,
+    };
+
     //TODO: Remove duplicate code
     var app, board;
     if (options.board) {
@@ -245,19 +250,14 @@ program
       var split = options.board.split('/');
       app = split[0];
       board = split[1];
-      config.currentApp = app;
-      config.currentBoard = board;
+      newConfig.currentApp = app;
+      newConfig.currentBoard = board;
     }
 
     dataNow = new DataNow(config);
 
-    dataNow.config({
-        board: options.board,
-        config: options.parent.config,
-        token: options.parent.token,
-        server: options.parent.server,
-        loglevel: options.parent.loglevel,
-      },
+
+    dataNow.config(newConfig,
       helper.genericResponse
     );
 

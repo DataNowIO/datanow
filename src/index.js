@@ -104,7 +104,7 @@ DataNow.prototype = {
 
   write: function(appName, boardName, data, callback) {
     var self = this;
-    log.debug('write', appName, boardName);
+
 
     //appName and boardName are optionals. Handling it.
     if (arguments.length == 2) {
@@ -113,6 +113,8 @@ DataNow.prototype = {
       appName = self.options.currentApp;
       boardName = self.options.currentBoard;
     }
+    log.debug('write', arguments.length, appName, boardName);
+
 
     request.post(self.options.server + '/api/app/' + appName + '/board/' + boardName + '/data', {
         json: {
@@ -244,7 +246,7 @@ DataNow.prototype = {
     if (fs.existsSync(self.options.config)) {
       try {
         var conf = JSON.parse(fs.readFileSync(self.options.config, 'utf8'));
-        optionsToSave = _.merge(optionsToSave, conf);
+        optionsToSave = _.merge(conf, optionsToSave);
         log.debug('Merged old config', conf, 'to', optionsToSave);
       } catch (e) {
         log.error('Error parsing config file.', e);
