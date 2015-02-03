@@ -18,7 +18,13 @@ datanow register --username garrows --email glen.arrowsmith@gmail.com --password
 datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
 
 datanow create testApp
+
+datanow logout
+datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
+
 datanow create testApp/testBoard
+
+
 datanow create testApp2
 datanow create testApp2/testBoard2
 
@@ -44,5 +50,7 @@ datanow set --board testApp/testBoard
 datanow read
 datanow read --board testApp2/testBoard2
 datanow read --board testApp3/testBoard3
+
+
 
 say winning

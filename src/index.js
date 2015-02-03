@@ -102,6 +102,21 @@ DataNow.prototype = {
     );
   },
 
+  logout: function(callback) {
+    var self = this;
+    log.debug('logout');
+
+    request.post(self.options.server + '/api/user/logout', function(err, res, body) {
+      if (self.checkForErrors(err, res, body, callback)) {
+        return;
+      }
+
+      self.config({
+        token: null
+      });
+    });
+  },
+
   write: function(appName, boardName, data, callback) {
     var self = this;
 

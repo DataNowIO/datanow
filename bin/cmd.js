@@ -93,6 +93,19 @@ program
   });
 
 
+program
+  .command('logout')
+  .description('logout of datanow.io and delete saved tokens.')
+  .action(function(options) {
+
+    setParentConfig(options.parent, config);
+
+    dataNow = new DataNow(config);
+
+    dataNow.logout(helper.genericResponse);
+  });
+
+
 
 program
   .command('create <app/board> [schema-type...]')
