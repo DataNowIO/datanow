@@ -6,6 +6,7 @@ var program = require('commander'),
   DataNow = require('../src/index.js'),
   packageInfo = require('../package.json');
 
+var dataNow;
 
 program
   .version(packageInfo.version)
@@ -18,13 +19,17 @@ program
 var config = {};
 
 function setParentConfig(program, config) {
-  config.config = program.config;
-  config.token = program.token;
-  config.server = program.server;
-  config.loglevel = program.loglevel ? program.loglevel : 'info';
 
-  log.setLevel(config.loglevel);
+  config.config = program && program.config ? program.config : config.config;
+  config.token = program && program.token ? program.token : config.token;
+  config.server = program && program.server ? program.server : config.server;
+  config.loglevel = program && program.loglevel ? program.loglevel : config.loglevel;
+  // config.loglevel = program&&  program.loglevel ? program.loglevel : (config.loglevel ? config.loglevel : 'info');
+  config.loglevel = program && program.loglevel ? program.loglevel : (config.loglevel ? config.loglevel : 'info');
+
+  log.setLevel(config.loglevel ? config.loglevel : 'info');
 }
+
 
 program
   .command('register')
@@ -42,7 +47,7 @@ program
     config.password = options.password;
     config.login = !options.noLogin;
 
-    var dataNow = new DataNow(config);
+    dataNow = new DataNow(config);
 
     helper.promptMissingCredentials(config, true, function(err, result) {
       if (err) {
@@ -74,7 +79,7 @@ program
     config.email = options.email;
     config.password = options.password;
 
-    var dataNow = new DataNow(config);
+    dataNow = new DataNow(config);
 
     //TODO: only require username or email
     helper.promptMissingCredentials(config, true, function(err, result) {
@@ -100,7 +105,7 @@ program
 
     setParentConfig(options.parent, config);
 
-    var dataNow = new DataNow(config);
+    dataNow = new DataNow(config);
 
     var splitIndex = appOrBoard.indexOf('/');
     var isApp = splitIndex === -1;
@@ -128,11 +133,10 @@ program
       );
 
       if (typeof options.dontUse == 'undefined') {
-        dataNow.use(
-          app,
-          board,
-          function() {}
-        );
+        dataNow.config({
+          currentApp: app,
+          currentBoard: board
+        });
       }
     }
   });
@@ -150,7 +154,7 @@ program
 
     moreData.splice(0, 0, data);
 
-    var dataNow = new DataNow(config);
+    dataNow = new DataNow(config);
 
     //TODO: Remove duplicate code
     var app, board;
@@ -184,7 +188,7 @@ program
 
     setParentConfig(options.parent, config);
 
-    var dataNow = new DataNow(config);
+    dataNow = new DataNow(config);
 
     var dataResponse = function(err, data) {
       if (err) {
@@ -221,32 +225,52 @@ program
 
 
 program
-  .command('use <app/board>')
-  .description('Set the current board.')
-  .action(function(boardNamespace, options) {
+  .command('set')
+  .description('Sets default settings.')
+  .option('-b, --board <app/board>', 'Sets the default board.')
+  .option('-c, --config <path>', 'Path to custom config file. Defaults to ~/.datanow-config.json')
+  .option('-t, --token <token>', 'Token to use (Overrides config file).')
+  .option('-t, --server <server>', 'Server to use (Overrides https://datanow.io).')
+  .option('-l, --loglevel <level>', 'Set logging level (trace, debug, info, warn, error). Defaults to info.')
+  .action(function(options) {
 
     setParentConfig(options.parent, config);
 
     //TODO: Remove duplicate code
     var app, board;
-    if (boardNamespace) {
-      if (boardNamespace.indexOf('/') === -1) {
+    if (options.board) {
+      if (options.board.indexOf('/') === -1) {
         return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
       }
-      var split = boardNamespace.split('/');
+      var split = options.board.split('/');
       app = split[0];
       board = split[1];
+      config.currentApp = app;
+      config.currentBoard = board;
     }
 
-    var dataNow = new DataNow(config);
+    dataNow = new DataNow(config);
 
-    dataNow.use(
-      app,
-      board,
+    dataNow.config({
+        board: options.board,
+        config: options.parent.config,
+        token: options.parent.token,
+        server: options.parent.server,
+        loglevel: options.parent.loglevel,
+      },
       helper.genericResponse
     );
+
+    dataNow.save(helper.genericResponse);
+
   });
 
 
 
 program.parse(process.argv);
+
+process.on('exit', function(code) {
+  if (dataNow && code == 0) {
+    dataNow.save();
+  }
+});

@@ -20,7 +20,7 @@ Register using the command below substituting in your username and email.
 datanow --register --username garrows --email glen@datanow.io --login
 ```
 
-Enter your password when prompted. An authorization token has been generated and placed in `~/.datanow-config.json`. You will need to __click the verification link that was sent to your email__ before proceeding.
+Enter your password when prompted. An authorization token has been generated and placed in `~/.datanow-config.json`. You may need to __click the verification link that was sent to your email__ before proceeding.
 
 
 ## Simple Example
@@ -29,7 +29,7 @@ First create an app and a board to post your data to.
 ```
 datanow create test-app
 datanow create test-app/test-board
-datanow use test-app/test-board
+datanow set --board test-app/test-board
 ```
 
 Now post some numbers to it.
@@ -84,7 +84,7 @@ datanow read
 Date, Number and String
 ```
 datanow create test-app/weights date number string
-datanow use test-app/weights
+datanow set --board test-app/weights
 datanow write `date -u +"%Y-%m-%dT%H:%M:%SZ"` 130 Homer
 datanow write `date -u +"%Y-%m-%dT%H:%M:%SZ"` 45 Bart
 datanow read

@@ -12,27 +12,37 @@ var request = Request.defaults({
 
 
 function DataNow(opts) {
+  var self = this;
   log.debug('Starting DataNow');
-  this.options = opts;
+  self.options = opts;
 
   //Attempt to read the config file.
-  this.options.config = this.options.config ? this.options.config : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + '/.datanow-config.json';
-  if (fs.existsSync(this.options.config)) {
+  self.options.config = self.options.config ? self.options.config : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + '/.datanow-config.json';
+  if (fs.existsSync(self.options.config)) {
     try {
-      var conf = JSON.parse(fs.readFileSync(this.options.config, 'utf8'));
-      config = _.merge(this.options, conf);
-      log.debug('Loaded config', conf);
+      var conf = JSON.parse(fs.readFileSync(self.options.config, 'utf8'));
+      self.options = _.merge(conf, self.options);
+      log.debug('Loaded config', self.options);
     } catch (e) {
       log.error('Error parsing config file.', e);
       process.exit(1);
     }
   }
 
-  this.options.server = this.options.server ? this.options.server : 'https://datanow.io';
-  if (this.options.token) {
-    log.debug('Using saved token', this.options.token);
-    var cookie = request.cookie('grailed-token=' + this.options.token);
-    cookieJar.setCookie(cookie, this.options.server);
+  //Only modify the loglevel from warn if told to
+  if (self.options.loglevel) {
+    log.setLevel(self.options.loglevel);
+  }
+
+  self.options.server = self.options.server ? self.options.server : 'https://datanow.io';
+
+  //Keep track of options changed after this point and save them to disk.
+  self.optionKeysToSave = [];
+
+  if (self.options.token) {
+    log.debug('Using saved auth token');
+    var cookie = request.cookie('grailed-token=' + self.options.token);
+    cookieJar.setCookie(cookie, self.options.server);
   }
 
 }
@@ -83,9 +93,11 @@ DataNow.prototype = {
         var cookies = cookieJar.getCookieString(self.options.server);
         // log.debug('login body', body);
         var re = new RegExp('[; ]grailed-token=([^\\s;]*)');
-        self.options.token = (' ' + cookies).match(re)[1];
-        log.debug('token cookies', self.options.token);
-        self.save(callback);
+        var token = (' ' + cookies).match(re)[1];
+        log.debug('token cookies', token);
+        self.config({
+          token: token
+        });
       }
     );
   },
@@ -179,22 +191,20 @@ DataNow.prototype = {
     );
   },
 
-  use: function(appName, boardName, callback) {
+  config: function(config) {
     var self = this;
 
-    var needSave = false;
-
-    if (appName != self.options.currentApp) {
-      self.options.currentApp = appName;
-      needSave = true;
-    }
-    if (boardName != self.options.currentBoard) {
-      self.options.currentBoard = boardName;
-      needSave = true;
-    }
-
-    if (needSave) {
-      return self.save(callback);
+    var keys = Object.keys(config),
+      key;
+    for (var i = 0; i < keys.length; i++) {
+      key = keys[i];
+      if (typeof config[key] !== 'undefined') {
+        self.options[key] = config[key];
+        if (self.optionKeysToSave.indexOf(key) === -1) {
+          log.debug('Marking', key, 'to be saved.', config[key]);
+          self.optionKeysToSave.push(key);
+        }
+      }
     }
   },
 
@@ -216,13 +226,45 @@ DataNow.prototype = {
 
   save: function(callback) {
     var self = this;
-    var json = JSON.stringify(self.options);
-    fs.writeFile(self.options.config, json, {
+
+    if (self.optionKeysToSave.length === 0) {
+      log.debug('Nothing to save');
+      typeof callback == 'function' && callback();
+      return;
+    }
+
+    //Get the options that need to be saved
+    var optionsToSave = {};
+    for (var i = 0; i < self.optionKeysToSave.length; i++) {
+      optionsToSave[self.optionKeysToSave[i]] = self.options[self.optionKeysToSave[i]];
+    }
+    log.debug('Options to save', optionsToSave);
+
+    //Get the existing options (if existing) and merge them
+    if (fs.existsSync(self.options.config)) {
+      try {
+        var conf = JSON.parse(fs.readFileSync(self.options.config, 'utf8'));
+        optionsToSave = _.merge(optionsToSave, conf);
+        log.debug('Merged old config', conf, 'to', optionsToSave);
+      } catch (e) {
+        log.error('Error parsing config file.', e);
+        process.exit(1);
+      }
+    }
+
+    var json = JSON.stringify(optionsToSave);
+    var fileOpts = {
       flag: 'w+'
-    }, function(err) {
-      log.debug('done writing config', self.options.config, err);
-      typeof callback == 'function' && callback(err);
-    });
+    };
+    if (typeof callback === 'function') {
+      fs.writeFile(self.options.config, json, fileOpts, function(err) {
+        log.debug('done writing config', optionsToSave);
+        callback(err);
+      });
+    } else {
+      fs.writeFileSync(self.options.config, json, fileOpts);
+      log.debug('done writing config', optionsToSave);
+    }
   }
 
 
