@@ -60,16 +60,13 @@ DataNow.prototype = {
           password: password
         }
       },
-      function(err, res, body) {
-        if (self.checkForErrors(err, res, body, callback)) {
-          return;
-        }
-        if (login) {
+      self.genericResponseHandler('register', function(err) {
+        if (login && !err) {
           return self.login(username, email, password, callback);
         } else {
-          return callback();
+          return callback(err);
         }
-      }
+      })
     );
   },
 
@@ -84,20 +81,19 @@ DataNow.prototype = {
           password: password
         }
       },
-      function(err, res, body) {
-        if (self.checkForErrors(err, res, body, callback)) {
-          return;
+      self.genericResponseHandler('login', function(err) {
+        if (err) {
+          return callback(err);
         }
-
         var cookies = cookieJar.getCookieString(self.options.server);
-        // log.debug('login body', body);
         var re = new RegExp('[; ]grailed-token=([^\\s;]*)');
         var token = (' ' + cookies).match(re)[1];
         log.debug('token cookies', token);
         self.config({
           token: token
         });
-      }
+        return callback();
+      })
     );
   },
 
@@ -105,20 +101,21 @@ DataNow.prototype = {
     var self = this;
     log.debug('logout');
 
-    request.post(self.options.server + '/api/user/logout', function(err, res, body) {
-      if (self.checkForErrors(err, res, body, callback)) {
-        return;
-      }
-
-      self.config({
-        token: null
-      });
-    });
+    request.post(self.options.server + '/api/user/logout',
+      self.genericResponseHandler('logout', function(err) {
+        if (err) {
+          return callback(err);
+        }
+        self.config({
+          token: null
+        });
+        return callback();
+      })
+    );
   },
 
   write: function(appName, boardName, data, callback) {
     var self = this;
-
 
     //appName and boardName are optionals. Handling it.
     if (arguments.length == 2) {
@@ -135,13 +132,7 @@ DataNow.prototype = {
           values: data
         }
       },
-      function(err, res, body) {
-        if (self.checkForErrors(err, res, body, callback)) {
-          return;
-        }
-        log.debug('write response', body);
-        callback();
-      }
+      self.genericResponseHandler('write', callback)
     );
   },
 
@@ -159,13 +150,9 @@ DataNow.prototype = {
     request.get(self.options.server + '/api/app/' + appName + '/board/' + boardName + '/data', {
         json: {}
       },
-      function(err, res, body) {
-        if (self.checkForErrors(err, res, body, callback)) {
-          return;
-        }
-        log.debug('read response', body);
-        callback(null, body.data);
-      }
+      self.genericResponseHandler('read', function(err, body) {
+        callback(err, body.data);
+      })
     );
   },
 
@@ -176,13 +163,7 @@ DataNow.prototype = {
     request.put(self.options.server + '/api/app/' + appName, {
         json: {}
       },
-      function(err, res, body) {
-        if (self.checkForErrors(err, res, body, callback)) {
-          return;
-        }
-        log.debug('newApp response', body);
-        callback();
-      }
+      self.genericResponseHandler('newApp', callback)
     );
   },
 
@@ -197,14 +178,30 @@ DataNow.prototype = {
     request.put(self.options.server + '/api/app/' + appName + '/board/' + boardName, {
         json: options
       },
-      function(err, res, body) {
-        if (self.checkForErrors(err, res, body, callback)) {
-          return;
-        }
-        log.debug('newBoard response', body);
-        callback();
-      }
+      self.genericResponseHandler('newBoard', callback)
     );
+  },
+
+  addAdmin: function(boardNamespace, username, callback) {
+    var self = this;
+    log.debug('addAdmin', boardNamespace);
+
+    request.put(self.buildUrl(boardNamespace) + '/admins', {
+      json: {
+        username: username
+      }
+    }, self.genericResponseHandler('addAdmin', callback));
+  },
+
+  removeAdmin: function(boardNamespace, username, callback) {
+    var self = this;
+    log.debug('removeAdmin', boardNamespace);
+
+    request.del(self.buildUrl(boardNamespace) + '/admins', {
+      json: {
+        username: username
+      }
+    }, self.genericResponseHandler('removeAdmin', callback));
   },
 
   config: function(config) {
@@ -281,7 +278,30 @@ DataNow.prototype = {
       fs.writeFileSync(self.options.config, json, fileOpts);
       log.debug('done writing config', optionsToSave);
     }
-  }
+  },
+
+  buildUrl: function(boardNamespace) {
+    var self = this;
+
+    var split = boardNamespace.split('/');
+    var url = self.options.server + '/api';
+    url += '/app/' + split[0];
+    if (typeof split[1] !== 'undefined') {
+      url += '/board/' + split[1];
+    }
+    return url;
+  },
+
+  genericResponseHandler: function(source, callback) {
+    var self = this;
+    return function(err, res, body) {
+      if (self.checkForErrors(err, res, body, callback)) {
+        return;
+      }
+      log.debug(source + ' response', body);
+      callback(undefined, body);
+    };
+  },
 
 
 }

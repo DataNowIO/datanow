@@ -15,12 +15,10 @@ datanow set --loglevel debug
 
 
 datanow register --username garrows --email glen.arrowsmith@gmail.com --password g
+datanow register --username garrows2 --email glen@datanow.io --password g2 --noLogin
 
 datanow create testApp
-
-datanow logout
-datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
-
+datanow update testApp --addAdmin garrows2
 datanow create testApp/testBoard
 
 
@@ -34,15 +32,21 @@ datanow write 1
 datanow write --board testApp/testBoard 2
 datanow write --board testApp2/testBoard2 `date -u +"%Y-%m-%dT%H:%M:%SZ"` 8
 datanow write --board testApp/testBoard 3
+
+datanow logout
+datanow login --username garrows2 --email glen@datanow.io --password g2
 datanow write --board testApp2/testBoard2 7
 
 
-
+datanow create testApp/testBoard4
 datanow create testApp3
 datanow create testApp3/testBoard3 number number string date
+datanow update testApp3/testBoard3 --addAdmin garrows
 datanow set --board testApp3/testBoard3
 
 datanow write 1 2 chicken `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+datanow logout
+datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
 datanow write 3 4 duck `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 
 datanow set --board testApp/testBoard

@@ -2,6 +2,7 @@
 
 var program = require('commander'),
   log = require('loglevel'),
+  async = require('async'),
   helper = require('./helper.js'),
   DataNow = require('../src/index.js'),
   packageInfo = require('../package.json');
@@ -117,6 +118,7 @@ program
 
     dataNow = new DataNow(config);
 
+    //TODO: Remove duplicate code
     var splitIndex = appOrBoard.indexOf('/');
     var isApp = splitIndex === -1;
 
@@ -152,6 +154,35 @@ program
   });
 
 
+program
+  .command('update <app/board>')
+  .description('Add or remove a board\'s admin.')
+  .option('-a, --addAdmin <username>', 'Authorize a user as an admin to this app or board.')
+  .option('-r, --removeAdmin <username>', 'Deauthorize a user as an admin to this app or board.')
+  .action(function(boardNamespace, options) {
+
+    setParentConfig(options.parent, config);
+
+    dataNow = new DataNow(config);
+
+    async.parallel([
+      function(done) {
+        if (options.addAdmin) {
+          dataNow.addAdmin(boardNamespace, options.addAdmin, done);
+        } else {
+          done();
+        }
+      },
+      function(done) {
+        if (options.removeAdmin) {
+          dataNow.removeAdmin(boardNamespace, options.removeAdmin, done);
+        } else {
+          done();
+        }
+      }
+    ], helper.genericResponse);
+
+  });
 
 
 program

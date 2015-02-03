@@ -17,7 +17,7 @@ Open a command line and run the following command to install. Requires [node.js]
 Register using the command below substituting in your username and email.
 
 ```
-datanow --register --username garrows --email glen@datanow.io --login
+datanow register --username yourName --email you@example.com
 ```
 
 Enter your password when prompted. An authorization token has been generated and placed in `~/.datanow-config.json`. You may need to __click the verification link that was sent to your email__ before proceeding.
@@ -94,3 +94,29 @@ datanow read
 #      [ '2015-02-02T14:12:51.000Z', 45, 'Bart' ]
 #   ]
 ```
+
+
+## Admins
+
+You can add admin users to your apps and boards. If you add an admin to the app, they are inherently an admin on that app's boards.
+
+Let's create a friend and test it out.
+```
+datanow register --username yourFriend --email yourFriend@example.com --noLogin
+```
+Note `yourFriend` doesn't automatically login like before because of the `--noLogin` flag.
+```
+datanow update test-app --addAdmin yourFriend
+datanow logout
+datanow login --username yourFriend --email yourFriend@example.com
+datanow create test-app/friends-board
+```
+See how `yourFriend` has permissions to create a new board? That's nice of you.
+```
+datanow update test-app --removeAdmin yourName
+```
+Hey! `YourFriend` just removed your admin privilages from your app. That is not very friendly but could be a completely legitimate use case.
+```
+datanow update test-app/test-board --addAdmin yourAcquaintance
+```
+Now `yourFriend` has added `yourAcquaintance` to `test-app/test-board`. At least `yourAcquaintance` doesn't have permission to create any boards in your `test-app`.
