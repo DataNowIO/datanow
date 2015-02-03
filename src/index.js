@@ -64,7 +64,6 @@ DataNow.prototype = {
         if (self.checkForErrors(err, res, body, callback)) {
           return;
         }
-        log.debug('Register body', body);
         if (login) {
           return self.login(username, email, password, callback);
         } else {

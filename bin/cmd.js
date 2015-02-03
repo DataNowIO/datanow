@@ -54,7 +54,7 @@ program
         result.username,
         result.email,
         result.password,
-        program.login,
+        config.login,
         helper.genericResponse
       );
     });

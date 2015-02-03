@@ -9,13 +9,12 @@ rm -f ~/.datanow-config.json
 npm link
 
 datanow set --server http://localhost:3000
-# datanow set --loglevel debug
+datanow set --loglevel debug
 
 
 
 
-datanow register --username garrows --email glen.arrowsmith@gmail.com --password g --noLogin
-datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
+datanow register --username garrows --email glen.arrowsmith@gmail.com --password g
 
 datanow create testApp
 
