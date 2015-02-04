@@ -112,45 +112,27 @@ program
   .command('create <app/board> [schema-type...]')
   .description('create a app or board. (e.g. datanow create testApp/testBoard date number)')
   .option('-U, --dontUse', 'Don\'t automatically use the new board.')
-  .action(function(appOrBoard, schema, options) {
+  .option('-F, --dontForce', 'Don\'t force auto creation of the app if it doesn\'t exist')
+  .action(function(namespace, schema, options) {
 
     setParentConfig(options.parent, config);
 
     dataNow = new DataNow(config);
 
-    //TODO: Remove duplicate code
-    var splitIndex = appOrBoard.indexOf('/');
-    var isApp = splitIndex === -1;
+    var force = !options.dontForce;
+    dataNow.create(
+      namespace,
+      schema.length > 0 ? schema : null,
+      force,
+      helper.genericResponse
+    );
 
-    if (isApp) {
-
-      if (schema.length > 0) {
-        return helper.genericError('Applications don\'t have a schema.');
-      }
-
-      dataNow.newApp(
-        appOrBoard,
-        helper.genericResponse
-      );
-    } else {
-      var split = appOrBoard.split('/');
-      var app = split[0];
-      var board = split[1];
-
-      dataNow.newBoard(
-        app,
-        board,
-        schema.length > 0 ? schema : null,
-        helper.genericResponse
-      );
-
-      if (typeof options.dontUse == 'undefined') {
-        dataNow.config({
-          currentApp: app,
-          currentBoard: board
-        });
-      }
+    if (typeof options.dontUse == 'undefined') {
+      dataNow.config({
+        currentNamespace: namespace
+      });
     }
+
   });
 
 
@@ -159,7 +141,7 @@ program
   .description('Add or remove a board\'s admin.')
   .option('-a, --addAdmin <username>', 'Authorize a user as an admin to this app or board.')
   .option('-r, --removeAdmin <username>', 'Deauthorize a user as an admin to this app or board.')
-  .action(function(boardNamespace, options) {
+  .action(function(namespace, options) {
 
     setParentConfig(options.parent, config);
 
@@ -168,14 +150,14 @@ program
     async.parallel([
       function(done) {
         if (options.addAdmin) {
-          dataNow.addAdmin(boardNamespace, options.addAdmin, done);
+          dataNow.addAdmin(namespace, options.addAdmin, done);
         } else {
           done();
         }
       },
       function(done) {
         if (options.removeAdmin) {
-          dataNow.removeAdmin(boardNamespace, options.removeAdmin, done);
+          dataNow.removeAdmin(namespace, options.removeAdmin, done);
         } else {
           done();
         }
@@ -197,19 +179,13 @@ program
 
     dataNow = new DataNow(config);
 
-    //TODO: Remove duplicate code
-    var app, board;
     if (options.board) {
       if (options.board.indexOf('/') === -1) {
         return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
       }
-      var split = options.board.split('/');
-      app = split[0];
-      board = split[1];
 
       dataNow.write(
-        app,
-        board,
+        options.board,
         moreData,
         helper.genericResponse
       );
@@ -238,25 +214,12 @@ program
       log.info(data);
     }
 
-    //TODO: Remove duplicate code
-    var app, board;
     if (options.board) {
-      if (options.board.indexOf('/') === -1) {
-        return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
-      }
-      var split = options.board.split('/');
-      app = split[0];
-      board = split[1];
+      helper.checkBoard(options.board);
 
-      dataNow.read(
-        app,
-        board,
-        dataResponse
-      );
+      dataNow.read(options.board, dataResponse);
     } else {
-      dataNow.read(
-        dataResponse
-      );
+      dataNow.read(dataResponse);
     }
 
 
@@ -278,28 +241,18 @@ program
     setParentConfig(options.parent, config);
 
     var newConfig = {
-      board: options.board,
       config: options.parent.config,
       token: options.parent.token,
       server: options.parent.server,
       loglevel: options.parent.loglevel,
     };
 
-    //TODO: Remove duplicate code
-    var app, board;
     if (options.board) {
-      if (options.board.indexOf('/') === -1) {
-        return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
-      }
-      var split = options.board.split('/');
-      app = split[0];
-      board = split[1];
-      newConfig.currentApp = app;
-      newConfig.currentBoard = board;
+      helper.checkBoard(options.board);
+      newConfig.currentNamespace = options.board;
     }
 
     dataNow = new DataNow(config);
-
 
     dataNow.config(newConfig,
       helper.genericResponse

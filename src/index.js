@@ -114,20 +114,18 @@ DataNow.prototype = {
     );
   },
 
-  write: function(appName, boardName, data, callback) {
+  write: function(namespace, data, callback) {
     var self = this;
 
-    //appName and boardName are optionals. Handling it.
+    //namespace is optional. Handling it.
     if (arguments.length == 2) {
-      data = appName;
-      callback = boardName;
-      appName = self.options.currentApp;
-      boardName = self.options.currentBoard;
+      callback = data;
+      data = namespace;
+      namespace = self.options.currentNamespace;
     }
-    log.debug('write', arguments.length, appName, boardName);
+    log.debug('write', namespace, data);
 
-
-    request.post(self.options.server + '/api/app/' + appName + '/board/' + boardName + '/data', {
+    request.post(self.buildUrl(namespace) + '/data', {
         json: {
           values: data
         }
@@ -136,68 +134,75 @@ DataNow.prototype = {
     );
   },
 
-  read: function(appName, boardName, callback) {
+  read: function(namespace, callback) {
     var self = this;
-    log.debug('read', appName, boardName);
+    log.debug('read', namespace);
 
-    //appName and boardName are optionals. Handling it.
+    //namespace is optional. Handling it.
     if (arguments.length == 1) {
-      callback = appName;
-      appName = self.options.currentApp;
-      boardName = self.options.currentBoard;
+      callback = namespace;
+      namespace = self.options.currentNamespace;
     }
 
-    request.get(self.options.server + '/api/app/' + appName + '/board/' + boardName + '/data', {
-        json: {}
-      },
+    request.get(self.buildUrl(namespace) + '/data',
       self.genericResponseHandler('read', function(err, body) {
         callback(err, body.data);
       })
     );
   },
 
-  newApp: function(appName, callback) {
+  create: function(namespace, schema, autoCreateApp, callback) {
     var self = this;
-    log.debug('newApp', appName);
+    log.debug('create', namespace);
 
-    request.put(self.options.server + '/api/app/' + appName, {
-        json: {}
-      },
-      self.genericResponseHandler('newApp', callback)
-    );
-  },
-
-  newBoard: function(appName, boardName, schema, callback) {
-    var self = this;
-    log.debug('newBoard', appName);
-
-    var options = {};
+    var requestBody = {};
     if (schema) {
-      options.schema = schema;
+      requestBody.schema = schema;
     }
-    request.put(self.options.server + '/api/app/' + appName + '/board/' + boardName, {
-        json: options
-      },
-      self.genericResponseHandler('newBoard', callback)
-    );
+    request.put(self.buildUrl(namespace), {
+      json: requestBody
+    }, function(err, res, body) {
+      if (err) {
+        return callback(err);
+      }
+      log.debug('create response', body);
+      //Check the auto create app feature & conditions
+      if (autoCreateApp && res.statusCode == 404 && namespace.indexOf('/') != -1) {
+        log.debug('App not found, auto creating');
+        //Create the app
+        var appNamespace = namespace.split('/')[0];
+        self.create(appNamespace, null, false, function(err) {
+          if (err) {
+            return callback(err);
+          }
+          log.debug('Created app. Creating board', namespace);
+          //Retry creating the board
+          return self.create(namespace, schema, false, callback);
+        });
+      } else if (self.checkForErrors(err, res, body, callback)) {
+        return;
+      } else {
+        callback(null, body);
+      }
+    });
   },
 
-  addAdmin: function(boardNamespace, username, callback) {
+  addAdmin: function(namespace, username, callback) {
     var self = this;
-    log.debug('addAdmin', boardNamespace);
+    log.debug('addAdmin', namespace);
 
-    request.put(self.buildUrl(boardNamespace) + '/admins', {
+    request.put(self.buildUrl(namespace) + '/admins', {
       json: {
         username: username
       }
     }, self.genericResponseHandler('addAdmin', callback));
   },
 
-  removeAdmin: function(boardNamespace, username, callback) {
+  removeAdmin: function(namespace, username, callback) {
     var self = this;
-    log.debug('removeAdmin', boardNamespace);
+    log.debug('removeAdmin', namespace);
 
-    request.del(self.buildUrl(boardNamespace) + '/admins', {
+    request.del(self.buildUrl(namespace) + '/admins', {
       json: {
         username: username
       }
@@ -280,10 +285,10 @@ DataNow.prototype = {
     }
   },
 
-  buildUrl: function(boardNamespace) {
+  buildUrl: function(namespace) {
     var self = this;
 
-    var split = boardNamespace.split('/');
+    var split = namespace.split('/');
     var url = self.options.server + '/api';
     url += '/app/' + split[0];
     if (typeof split[1] !== 'undefined') {
@@ -299,7 +304,16 @@ DataNow.prototype = {
         return;
       }
       log.debug(source + ' response', body);
-      callback(undefined, body);
+      if (typeof body == 'string') {
+        try {
+          var obj = JSON.parse(body);
+          callback(undefined, obj);
+        } catch (e) {
+          callback(undefined, body);
+        }
+      } else {
+        callback(undefined, body);
+      }
     };
   },
 

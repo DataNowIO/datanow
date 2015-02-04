@@ -17,9 +17,8 @@ datanow set --loglevel debug
 datanow register --username garrows --email glen.arrowsmith@gmail.com --password g
 datanow register --username garrows2 --email glen@datanow.io --password g2 --noLogin
 
-datanow create testApp
-datanow update testApp --addAdmin garrows2
 datanow create testApp/testBoard
+datanow update testApp --addAdmin garrows2
 
 
 datanow create testApp2

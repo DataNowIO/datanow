@@ -49,14 +49,14 @@ datanow read
 #   [ '2015-01-29T10:01:09.542Z', 3 ]
 # ]
 ```
-You like that? Good. I do too.
+You like that? Good. I was hoping you would.
 
 
 ## Specifying Date
 
 Notice how in the above example you got a date back? That is because the default schema is `[ date, number ]` and if you don't supply date its is auto filled.
 
-Let's try specifying our own date in the [ISO 8601 format](http://en.wikipedia.org/wiki/ISO_8601).
+Let's try specifying our own date in the [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601) format.
 ```
 datanow write 2014-12-28T13:27:48.000Z 4
 #   reads out as [ '2014-12-28T13:27:48.000Z', 4 ]

@@ -27,6 +27,12 @@ var helper = module.exports = {
     }
   },
 
+  checkBoard: function(board) {
+    if (board.indexOf('/') === -1) {
+      return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
+    }
+  },
+
   promptMissingCredentials: function(program, isRegister, callback) {
     //Ask for username, email and/or password depending on what was supplied
     prompt.message = '';
@@ -70,5 +76,7 @@ var helper = module.exports = {
 
     });
   },
+
+
 
 };
