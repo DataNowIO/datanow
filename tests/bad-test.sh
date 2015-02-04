@@ -33,7 +33,7 @@ datanow write --board testApp2/testBoard2 `date -u +"%Y-%m-%dT%H:%M:%SZ"` 8
 datanow write --board testApp/testBoard 3
 
 datanow logout
-datanow login --username garrows2 --email glen@datanow.io --password g2
+datanow login --email glen@datanow.io --password g2
 datanow write --board testApp2/testBoard2 7
 
 
@@ -45,7 +45,7 @@ datanow set --board testApp3/testBoard3
 
 datanow write 1 2 chicken `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 datanow logout
-datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
+datanow login --email glen.arrowsmith@gmail.com --password g
 datanow write 3 4 duck `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 
 datanow set --board testApp/testBoard

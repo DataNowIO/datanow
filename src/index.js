@@ -74,12 +74,20 @@ DataNow.prototype = {
     var self = this;
     log.debug('login', username, email);
 
+    var requestBody = {};
+    if (username) {
+      requestBody.username = username;
+    }
+    if (email) {
+      requestBody.email = email;
+    }
+    if (password) {
+      requestBody.password = password;
+    }
+    log.debug('login', requestBody);
+
     request.post(self.options.server + '/api/user/login', {
-        json: {
-          username: username,
-          email: email,
-          password: password
-        }
+        json: requestBody
       },
       self.genericResponseHandler('login', function(err) {
         if (err) {
