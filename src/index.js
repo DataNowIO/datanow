@@ -41,7 +41,7 @@ function DataNow(opts) {
 
   if (self.options.token) {
     log.debug('Using saved auth token');
-    var cookie = request.cookie('grailed-token=' + self.options.token);
+    var cookie = request.cookie('webportal-token=' + self.options.token);
     cookieJar.setCookie(cookie, self.options.server);
   }
 
@@ -94,7 +94,7 @@ DataNow.prototype = {
           return callback(err);
         }
         var cookies = cookieJar.getCookieString(self.options.server);
-        var re = new RegExp('[; ]grailed-token=([^\\s;]*)');
+        var re = new RegExp('[; ]webportal-token=([^\\s;]*)');
         var token = (' ' + cookies).match(re)[1];
         log.debug('token cookies', token);
         self.config({

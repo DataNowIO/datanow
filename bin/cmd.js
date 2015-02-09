@@ -168,32 +168,47 @@ program
 
 
 program
-  .command('write <data> [moreData...]')
+  .command('write [data] [moreData...]')
   .description('Write data to a board (string, date, number).')
   .option('-b, --board <app/board>', 'Override the current board.')
   .action(function(data, moreData, options) {
 
     setParentConfig(options.parent, config);
 
-    moreData.splice(0, 0, data);
-
     dataNow = new DataNow(config);
 
-    if (options.board) {
-      if (options.board.indexOf('/') === -1) {
-        return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
+    var write = function(dataArr) {
+      if (options.board) {
+        if (options.board.indexOf('/') === -1) {
+          return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
+        }
+
+        dataNow.write(
+          options.board,
+          dataArr,
+          helper.genericResponse
+        );
+      } else {
+        dataNow.write(dataArr, helper.genericResponse);
       }
+    };
 
-      dataNow.write(
-        options.board,
-        moreData,
-        helper.genericResponse
-      );
+    if (typeof data == 'undefined') {
+
+      process.stdin.resume();
+      process.stdin.setEncoding('utf8');
+
+      process.stdin.on('data', function(chunk) {
+        write([chunk]);
+      });
+
+      process.stdin.on('end', function() {
+        log.debug('Ended stdin stream.');
+      });
     } else {
-      dataNow.write(moreData, helper.genericResponse);
+      moreData.splice(0, 0, data);
+      write(moreData);
     }
-
-
   });
 
 
