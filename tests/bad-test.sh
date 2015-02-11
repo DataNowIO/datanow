@@ -48,10 +48,18 @@ datanow logout
 datanow login --email glen.arrowsmith@gmail.com --password g
 datanow write 3 4 duck `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 
-datanow set --board testApp/testBoard
-datanow read
-datanow read --board testApp2/testBoard2
-datanow read --board testApp3/testBoard3
+datanow create testApp/singleNumbers number
+datanow write 2
+datanow write 4
+datanow write 6
+datanow write 8
+datanow write 10
+
+
+datanow set --board testApp/testBoard --loglevel info
+datanow read --format csv
+datanow read --format csv --board testApp2/testBoard2
+datanow read --format csv --board testApp3/testBoard3
 
 
 

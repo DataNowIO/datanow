@@ -3,7 +3,8 @@
 var program = require('commander'),
   log = require('loglevel'),
   async = require('async'),
-  helper = require('./helper.js'),
+  helper = require('../src/helper.js'),
+  formatter = require('../src/formatter.js'),
   DataNow = require('../src/index.js'),
   packageInfo = require('../package.json');
 
@@ -216,25 +217,20 @@ program
   .command('read')
   .description('Read data from a board.')
   .option('-b, --board <app/board>', 'Override the current board.')
+  .option('-f, --format <format>', 'Output format (csv, json).')
+  .option('-d, --delimiter <delimiter>', 'Output format (csv, json).')
   .action(function(options) {
 
     setParentConfig(options.parent, config);
 
     dataNow = new DataNow(config);
 
-    var dataResponse = function(err, data) {
-      if (err) {
-        return helper.genericError(err);
-      }
-      log.info(data);
-    }
-
     if (options.board) {
       helper.checkBoard(options.board);
 
-      dataNow.read(options.board, dataResponse);
+      dataNow.read(options.board, formatter.dataResponse.bind(formatter, options));
     } else {
-      dataNow.read(dataResponse);
+      dataNow.read(formatter.dataResponse.bind(formatter, options));
     }
   });
 
