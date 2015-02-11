@@ -42,12 +42,10 @@ datanow write 3
 Let's get those numbers back.
 ```
 datanow read
-# prints  
-# [
-#   [ '2015-01-29T10:01:06.382Z', 1 ],
-#   [ '2015-01-29T10:01:07.194Z', 2 ],
-#   [ '2015-01-29T10:01:09.542Z', 3 ]
-# ]
+# Prints  
+#  2015-01-29T10:01:06.382Z, 1
+#  2015-01-29T10:01:07.194Z, 2
+#  2015-01-29T10:01:09.542Z, 3
 ```
 You like that? Good. I was hoping you would.
 
@@ -59,10 +57,10 @@ Notice how in the above example you got a date back? That is because the default
 Let's try specifying our own date in the [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601) format.
 ```
 datanow write 2014-12-28T13:27:48.000Z 4
-#   reads out as [ '2014-12-28T13:27:48.000Z', 4 ]
+#   reads out as 2014-12-28T13:27:48.000Z, 4
 
 datanow write 2014-12-29 5
-#   reads out as [ '2014-12-29T00:00:00.000Z', 5 ]
+#   reads out as 2014-12-29T00:00:00.000Z, 5
 ```
 
 
@@ -78,7 +76,7 @@ datanow write world
 datanow write 'goodbye world'
 datanow read
 # Prints
-#   [ 'hello', 'world', 'goodbye world' ]
+#  hello, world, goodbye world
 ```
 
 Date, Number and String
@@ -89,12 +87,106 @@ datanow write `date -u +"%Y-%m-%dT%H:%M:%SZ"` 130 Homer
 datanow write `date -u +"%Y-%m-%dT%H:%M:%SZ"` 45 Bart
 datanow read
 # Prints
-#   [
-#      [ '2015-02-02T14:12:45.000Z', 130, 'Homer' ],
-#      [ '2015-02-02T14:12:51.000Z', 45, 'Bart' ]
-#   ]
+# 2015-02-02T14:12:45.000Z, 130, Homer
+# 2015-02-02T14:12:51.000Z, 45, Bart
 ```
 
+Numbers only
+```
+datanow create test-app/temp number
+datanow write -- -3
+for i in {-3..5}
+do
+  datanow write -- $i
+done
+datanow write 5
+
+datanow read
+# Prints
+# -3, -3, -2, -1, 0, 1, 2, 3, 4, 5, 5
+```
+Note in this example that it uses the `--`. That is a standard with command line tools for handling negative numbers as it marks end of options.
+
+
+## Formatting Output
+
+The default output option is CSV but there are a few more.
+
+### CSV Format
+
+CSV (comma separated values) looks nice and you can use with LibreOffice's Calc Spreadsheet program or others similar programs. Just pipe the output to a file.
+```
+datanow read --format csv > output.csv
+
+# Try opening with the default program.
+open output.csv
+```
+
+If you want, you can specify the delimiter as well. Lets try with spaces which could be handy if you're piping to a program like GNUPlot.
+```
+datanow read --format csv --delimiter ' '
+# Prints
+# -3 -3 -2 -1 0 1 2 3 4 5 5
+```
+
+### JSON Format
+
+```
+datanow read --format json
+# Prints
+# [-3,-3,-2,-1,0,1,2,3,4,5,5]
+
+datanow read --board test-app/weights --format json
+# Prints
+# [["2015-02-02T14:12:45.000Z",130,"Homer"],["2015-02-02T14:12:51.000Z",45,"Bart"]]
+```
+That last one is a bit hard to read. Lets use the node package [json](https://npmjs.org/package/json) to make it a bit nicer.
+```
+sudo npm install -g json
+datanow read --board test-app/weights --format json | json
+# Prints
+#  [
+#    [
+#      "2015-02-02T14:12:45.000Z",
+#      130,
+#      "Homer"
+#    ],
+#    [
+#      "2015-02-02T14:12:51.000Z",
+#      45,
+#      "Bart"
+#    ]
+#  ]
+```
+
+### JS Format
+
+This is very similar to JSON format but it prints the javascript object in shorthand which is not valid JSON.
+
+```
+datanow read --board test-app/weights --format js
+# Prints
+# [ [ '2015-02-02T14:12:45.000Z', 130, 'Homer' ],
+#   [ '2015-02-02T14:12:51.000Z', 45, 'Bart' ] ]
+```
+
+### ASCII Plot Output
+
+You can even plot some cool graphs in the command line with the plot format.
+```
+datanow read --board test-app/temp --format plot
+# Prints
+#    ▲
+#    │                 • •
+#    │               •
+#    │             •
+#    │           •
+#    │         •
+#    ┼───────•────────────▶
+#    │     •
+#    │   •
+#    • •
+```
 
 ## Admins
 

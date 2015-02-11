@@ -12,7 +12,8 @@ var helper = module.exports = {
 
   genericError: function(err) {
     if (err instanceof Error) {
-      log.error(err.stack);
+      log.error(err.message || err);
+      log.debug(err.stack);
     } else {
       log.error(err);
     }

@@ -218,7 +218,7 @@ program
   .description('Read data from a board.')
   .option('-b, --board <app/board>', 'Override the current board.')
   .option('-f, --format <format>', 'Output format (csv, json).')
-  .option('-d, --delimiter <delimiter>', 'Output format (csv, json).')
+  .option('-d, --delimiter <delimiter>', 'Output format (eg. csv, json, js, plot). Defaults to csv.')
   .action(function(options) {
 
     setParentConfig(options.parent, config);

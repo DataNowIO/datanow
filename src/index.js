@@ -154,7 +154,7 @@ DataNow.prototype = {
 
     request.get(self.buildUrl(namespace) + '/data',
       self.genericResponseHandler('read', function(err, body) {
-        callback(err, body.data);
+        callback(err, body);
       })
     );
   },
@@ -241,8 +241,14 @@ DataNow.prototype = {
       return true;
     }
     if (res.statusCode != 200) {
-      var e = new Error('Unknown server error.');
-      e.message = body && body.error && body.error.message ? body.error.message : e.message;
+      if (typeof body == 'string') {
+        try {
+          body = JSON.parse(body);
+        } catch (e) {}
+      }
+      var message = body && body.error && body.error.message ? body.error.message : 'Unknown server error.';
+      log.debug(message, body);
+      var e = new Error(message);
       e.status = res.status;
       callback(e);
       return true;
@@ -315,10 +321,10 @@ DataNow.prototype = {
       if (typeof body == 'string') {
         try {
           var obj = JSON.parse(body);
-          callback(undefined, obj);
         } catch (e) {
-          callback(undefined, body);
+          return callback(undefined, body);
         }
+        return callback(undefined, obj);
       } else {
         callback(undefined, body);
       }
