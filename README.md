@@ -226,4 +226,4 @@ and this in the other
 for i in {5..15}; do   datanow write -- $i; done
 ```
 You should see the plot updating in realtime.
-<!--TODO: make a gif -->
+![streaming example](http://i.gyazo.com/73c4636607dd275ecd21d492a466872b.gif)
