@@ -16,6 +16,7 @@ var helper = module.exports = {
       log.warn('Unknown format. Defaulting to csv.');
       options.format = 'csv';
     }
+
     this[options.format](board, options);
   },
 
@@ -60,7 +61,6 @@ var helper = module.exports = {
     var CliGraph = require("cli-graph");
 
     if (_.isEqual(board.schema, ['number'])) {
-      var width = data.length < 80 ? data.length : 80;
       var max = _.max(data);
       var min = _.min(data);
       var height, centerY;
@@ -74,13 +74,13 @@ var helper = module.exports = {
 
       var g1 = new CliGraph({
         height: height,
-        width: width,
+        width: data.length,
         center: {
           x: 0,
           y: centerY
         }
       }).setFunction(function(x) {
-        if (x < 0) return 0;
+        if (x < 0) return null;
 
         return data[x];
       });

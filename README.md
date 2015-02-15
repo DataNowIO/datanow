@@ -212,3 +212,18 @@ Hey! `YourFriend` just removed your admin privilages from your app. That is not 
 datanow update test-app/test-board --addAdmin yourAcquaintance
 ```
 Now `yourFriend` has added `yourAcquaintance` to `test-app/test-board`. At least `yourAcquaintance` doesn't have permission to create any boards in your `test-app`.
+
+
+## Streaming Reads
+
+Datanow has the ability to stream data in real time using the `--stream` flag. Try it by opening up 2 terminal windows and running this in one
+```
+datanow set --board test-app/temp
+datanow read --format plot --stream
+```
+and this in the other
+```
+for i in {5..15}; do   datanow write -- $i; done
+```
+You should see the plot updating in realtime.
+<!--TODO: make a gif -->

@@ -155,6 +155,27 @@ DataNow.prototype = {
     request.get(self.buildUrl(namespace) + '/data',
       self.genericResponseHandler('read', function(err, body) {
         callback(err, body);
+
+        if (self.options.stream) {
+          log.debug('stream read');
+          var socket = require('socket.io-client')(self.options.server);
+          socket.on('connect', function() {
+            log.debug('socket connected');
+          });
+          socket.on(namespace, function(msg) {
+            log.debug('socket got data', msg);
+            if (self.options.reprintEntireData) {
+              body.data = body.data.concat(msg.data);
+              callback(undefined, body);
+            } else {
+              callback(undefined, msg);
+            }
+          });
+          socket.on('disconnect', function() {
+            log.debug('socket disconnect');
+          });
+        }
+
       })
     );
   },

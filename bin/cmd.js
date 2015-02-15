@@ -218,10 +218,16 @@ program
   .description('Read data from a board.')
   .option('-b, --board <app/board>', 'Override the current board.')
   .option('-f, --format <format>', 'Output format (csv, json).')
+  .option('-s, --stream', 'Stream data in real time.')
   .option('-d, --delimiter <delimiter>', 'Output format (eg. csv, json, js, plot). Defaults to csv.')
   .action(function(options) {
 
     setParentConfig(options.parent, config);
+
+    config.stream = options.stream;
+    if (options.format == 'plot') {
+      config.reprintEntireData = true;
+    }
 
     dataNow = new DataNow(config);
 
