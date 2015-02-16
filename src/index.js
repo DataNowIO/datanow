@@ -10,6 +10,9 @@ var request = Request.defaults({
   jar: cookieJar
 });
 
+//TODO: Resign SSL.
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+
 
 function DataNow(opts) {
   var self = this;
@@ -213,6 +216,22 @@ DataNow.prototype = {
       } else {
         callback(null, body);
       }
+    });
+  },
+
+  delete: function(namespace, callback) {
+    var self = this;
+    log.debug('remove', namespace);
+
+    var requestBody = {};
+    request.del(self.buildUrl(namespace), {
+      json: requestBody
+    }, function(err, res, body) {
+      if (err) {
+        return callback(err);
+      }
+      log.debug('remove response', body);
+      self.checkForErrors(err, res, body, callback);
     });
   },
 

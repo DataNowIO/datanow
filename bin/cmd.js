@@ -138,6 +138,52 @@ program
 
 
 program
+  .command('delete <app/board>')
+  .description('delete a app or board.')
+  .option('-y, --yes', 'Don\'t confirm.')
+  .action(function(namespace, options) {
+
+    setParentConfig(options.parent, config);
+
+    dataNow = new DataNow(config);
+
+    var deleteIt = function() {
+      dataNow.delete(
+        namespace,
+        helper.genericResponse
+      );
+    }
+
+    if (options.yes) {
+      deleteIt();
+    } else {
+      var prompt = require('prompt');
+      prompt.message = '';
+      prompt.delimiter = '';
+      prompt.start();
+      var schema = {
+        properties: {
+          confirm: {
+            pattern: /^[yYnN]+$/,
+            description: 'This will delete all your data. Are you sure? [y/N]',
+            message: 'y or n only please.',
+            required: true
+          }
+        }
+      }
+      prompt.get(schema, function(err, result) {
+        if (result.confirm.toLowerCase() == 'y') {
+          deleteIt();
+        }
+      });
+    }
+
+
+
+  });
+
+
+program
   .command('update <app/board>')
   .description('Add or remove a board\'s admin.')
   .option('-a, --addAdmin <username>', 'Authorize a user as an admin to this app or board.')
