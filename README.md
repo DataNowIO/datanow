@@ -1,7 +1,7 @@
 # [DataNow.io](http://datanow.io) CLI & SDK
 
 
-[DataNow.io](http://datanow.io) is a simple hosted service you can send generic data, read it back or graph it in a nice app. This is a simple command line tool and node.js SDK for interfacing with it.
+[DataNow.io](http://datanow.io) is a simple service you can send generic data, read it back or graph it in a nice app. This is a simple command line tool and node.js SDK for interfacing with it.
 
 ## Examples
 
