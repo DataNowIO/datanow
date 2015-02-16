@@ -82,13 +82,7 @@ var helper = module.exports = {
 
       var height, centerY;
 
-
-
-      var scaler = 1;
-      //Make sure the graph isnt too high.
-      if (max > MAX_HEIGHT) {
-        scaler = MAX_HEIGHT / max;
-      }
+      var scaler = MAX_HEIGHT / max;
 
       if (min > 0) {
         height = max * scaler + 2;
