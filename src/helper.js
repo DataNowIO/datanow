@@ -7,7 +7,7 @@ var helper = module.exports = {
     if (err) {
       return helper.genericError(err);
     }
-    log.info('Success.');
+    log.debug('Success.');
   },
 
   genericError: function(err) {

@@ -49,11 +49,8 @@ datanow login --email glen.arrowsmith@gmail.com --password g
 datanow write 3 4 duck `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 
 datanow create testApp/singleNumbers number
-for i in {-5..5}
-do
-  datanow write -- $i
-done
 
+for i in {0..5}; do   datanow write -- $i; done
 
 datanow set --board testApp/testBoard --loglevel info
 datanow read

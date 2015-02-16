@@ -61,15 +61,41 @@ var helper = module.exports = {
     var CliGraph = require("cli-graph");
 
     if (_.isEqual(board.schema, ['number'])) {
-      var max = _.max(data);
-      var min = _.min(data);
+      var MAX_HEIGHT = process.stdout.rows - 5;
+      var MAX_WIDTH = process.stdout.columns / 2 - 1;
+      if (data.length > MAX_WIDTH) {
+        data = data.slice(data.length - MAX_WIDTH);
+      }
+      //Find the max, min, sum and mean;
+      var max, min, mean, sum = 0;
+      for (var i = 0; i < data.length; i++) {
+        var x = data[i];
+        if (typeof max == 'undefined' || x > max) {
+          max = x;
+        }
+        if (typeof min == 'undefined' || x < min) {
+          min = x;
+        }
+        sum += x;
+      }
+      mean = sum / data.length;
+
       var height, centerY;
+
+
+
+      var scaler = 1;
+      //Make sure the graph isnt too high.
+      if (max > MAX_HEIGHT) {
+        scaler = MAX_HEIGHT / max;
+      }
+
       if (min > 0) {
-        height = max + 2;
+        height = max * scaler + 2;
         centerY = height - 1;
       } else {
-        height = max - min + 2;
-        centerY = height + min - 1;
+        height = max * scaler - min * scaler + 2;
+        centerY = height + min * scaler - 1;
       }
 
       var g1 = new CliGraph({
@@ -81,10 +107,10 @@ var helper = module.exports = {
         }
       }).setFunction(function(x) {
         if (x < 0) return null;
-
-        return data[x];
+        return data[x] * scaler;
       });
       console.log(g1.toString());
+      console.log("Max=%d Min=%d Mean=%d Last=%d", max, min, mean.toFixed(2), data[data.length - 1]);
     } else {
       log.error('The board schema isn\'t supported for plotting at the moment.')
     }

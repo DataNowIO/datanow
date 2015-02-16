@@ -178,7 +178,10 @@ program
 
     dataNow = new DataNow(config);
 
-    var write = function(dataArr) {
+    var write = function(dataArr, callback) {
+      if (typeof callback != 'function') {
+        callback = helper.genericResponse;
+      }
       if (options.board) {
         if (options.board.indexOf('/') === -1) {
           return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
@@ -187,10 +190,10 @@ program
         dataNow.write(
           options.board,
           dataArr,
-          helper.genericResponse
+          callback
         );
       } else {
-        dataNow.write(dataArr, helper.genericResponse);
+        dataNow.write(dataArr, callback);
       }
     };
 
@@ -200,7 +203,13 @@ program
       process.stdin.setEncoding('utf8');
 
       process.stdin.on('data', function(chunk) {
-        write([chunk]);
+
+        write([chunk], function(err) {
+          if (err) {
+            return helper.genericError(err);
+          }
+          log.info('Wrote', chunk.toString().trim());
+        });
       });
 
       process.stdin.on('end', function() {
