@@ -81,7 +81,7 @@ program
     dataNow = new DataNow(config);
 
     //TODO: only require username or email
-    helper.promptMissingCredentials(config, true, function(err, result) {
+    helper.promptMissingCredentials(config, false, function(err, result) {
       if (err) {
         return helper.genericError(err);
       }

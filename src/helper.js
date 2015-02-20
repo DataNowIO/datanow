@@ -42,7 +42,7 @@ var helper = module.exports = {
     var schema = {
       properties: {}
     };
-    if (isRegister) {
+    if (!isRegister) {
       if (!program.username && !program.email) {
         schema.properties.usernameOrEmail = {
           description: 'Enter your username or email:',
