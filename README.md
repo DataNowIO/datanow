@@ -23,10 +23,16 @@ Register using the command below substituting in your username and email.
 
 ```
 datanow register --username yourName --email you@example.com
+# Enter your password
 ```
 
-Enter your password when prompted. An authorization token has been generated and placed in `~/.datanow-config.json`. You may need to __click the verification link that was sent to your email__ before proceeding.
+You will need to __click the verification link that was sent to your email__ before proceeding.
 
+Now you can login.
+```
+datanow login --username yourName --email you@example.com
+```
+An authorization token has been generated and placed in `~/.datanow-config.json` so DataNow will remember you.
 
 ## Simple Example
 

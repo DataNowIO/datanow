@@ -4,8 +4,6 @@ mongo DataNow --eval "db.dropDatabase()" > /dev/null
 
 rm -f ~/.datanow-config.json
 
-# MY_PATH="`dirname \"$0\"`"
-# DataNow="node $MY_PATH/../bin/cmd.js"
 npm link
 
 datanow set --server http://localhost:3000
@@ -15,7 +13,10 @@ datanow set --loglevel debug
 
 
 datanow register --username garrows --email glen.arrowsmith@gmail.com --password g
-datanow register --username garrows2 --email glen@datanow.io --password g2 --noLogin
+datanow register --username garrows2 --email glen@datanow.io --password g2
+
+datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
+
 
 datanow create testApp/testBoard
 datanow update testApp --addAdmin garrows2

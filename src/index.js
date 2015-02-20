@@ -52,7 +52,7 @@ function DataNow(opts) {
 
 DataNow.prototype = {
 
-  register: function(username, email, password, login, callback) {
+  register: function(username, email, password, callback) {
     var self = this;
     log.debug('register', username, email);
 
@@ -63,13 +63,7 @@ DataNow.prototype = {
           password: password
         }
       },
-      self.genericResponseHandler('register', function(err) {
-        if (login && !err) {
-          return self.login(username, email, password, callback);
-        } else {
-          return callback(err);
-        }
-      })
+      self.genericResponseHandler('register', callback)
     );
   },
 

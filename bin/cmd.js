@@ -36,7 +36,6 @@ program
   .option('-u, --username <username>', 'User\'s desired username.')
   .option('-e, --email <email>', 'User\'s email address.')
   .option('-p, --password <password>', 'User\'s password.')
-  .option('-L, --noLogin', 'Stops the automatic login after registration.')
   .action(function(options) {
 
     setParentConfig(options.parent, config);
@@ -44,7 +43,6 @@ program
     config.username = options.username;
     config.email = options.email;
     config.password = options.password;
-    config.login = !options.noLogin;
 
     dataNow = new DataNow(config);
 
@@ -56,7 +54,6 @@ program
         result.username,
         result.email,
         result.password,
-        config.login,
         helper.genericResponse
       );
     });
