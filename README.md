@@ -264,5 +264,7 @@ datanow read --board test-app/temperature --limit 3 --page 1 --reverse
 
 The `--reverse` flag can be very useful. If you prefer it as the default, use the `set` command.
 ```
-
+datanow set --reverse true
+#or
+datanow set --reverse false
 ```
