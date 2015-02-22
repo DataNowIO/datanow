@@ -12,7 +12,7 @@ var dataNow;
 
 program
   .version(packageInfo.version)
-  .option('-c, --config <path>', 'Path to custom config file. Defaults to ~/.datanow-config.json')
+  .option('-c, --config <path>', 'Path to custom config file (Defaults to ~/.datanow-config.json).')
   .option('-t, --token <token>', 'Token to use (Overrides config file).')
   .option('-t, --server <server>', 'Server to use (Overrides https://datanow.io).')
   .option('-l, --loglevel <level>', 'Set logging level (trace, debug, info, warn, error). Defaults to info.')
@@ -275,7 +275,8 @@ program
   .option('-f, --format <format>', 'Output format (csv, json).')
   .option('-s, --stream', 'Stream data in real time.')
   .option('-l, --limit <number>', 'Limit of items returned per page (Max & default is 50).')
-  .option('-p, --page <number>', 'Page number to continue from when reading paged data.')
+  .option('-p, --page <number>', 'Page number to continue from when reading paged data. (ie. Page 1 is the latest data)')
+  .option('-r, --reverse [true|false]', 'Reverse the dataset on reads (Newest first).')
   .option('-d, --delimiter <delimiter>', 'Output format (eg. csv, json, js, plot). Defaults to csv.')
   .action(function(options) {
 
@@ -291,6 +292,7 @@ program
     var readOpts = {}
     readOpts.limit = options.limit ? options.limit : undefined;
     readOpts.page = options.page ? options.page : undefined;
+    readOpts.reverse = options.reverse ? options.reverse : undefined;
 
     if (options.board) {
       helper.checkBoard(options.board);
@@ -307,6 +309,7 @@ program
   .command('set')
   .description('Sets default settings.')
   .option('-b, --board <app/board>', 'Sets the default board.')
+  .option('-r, --reverse [true|false]', 'Reverse the dataset on reads (Newest first).')
   .option('-c, --config <path>', 'Path to custom config file. Defaults to ~/.datanow-config.json')
   .option('-t, --token <token>', 'Token to use (Overrides config file).')
   .option('-t, --server <server>', 'Server to use (Overrides https://datanow.io).')
@@ -325,6 +328,16 @@ program
     if (options.board) {
       helper.checkBoard(options.board);
       newConfig.currentNamespace = options.board;
+    }
+
+    if (options.reverse) {
+      try {
+        //Converts 'false' or '0'
+        newConfig.reverse = JSON.parse(options.reverse);
+      } catch (e) {
+        log.error('Unknown --reverse value. Try "true" or "false".');
+        process.exit(1);
+      }
     }
 
     dataNow = new DataNow(config);

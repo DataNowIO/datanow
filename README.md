@@ -104,7 +104,7 @@ datanow read
 
 Numbers only
 ```
-datanow create test-app/temp number
+datanow create test-app/temperature number
 datanow write -- -3
 for i in {-3..5}
 do
@@ -185,7 +185,7 @@ datanow read --board test-app/weights --format js
 
 You can even plot some cool graphs in the command line with the plot format.
 ```
-datanow read --board test-app/temp --format plot
+datanow read --board test-app/temperature --format plot
 # Prints
 #    ▲
 #    │                 • •
@@ -207,7 +207,7 @@ Let's create a friend and test it out.
 ```
 datanow register --username yourFriend --email yourFriend@example.com
 ```
-Note `yourFriend` will have to click their email confirmation link before proceeding. 
+Note `yourFriend` will have to click their email confirmation link before proceeding.
 ```
 datanow update test-app --addAdmin yourFriend
 datanow logout
@@ -227,9 +227,9 @@ Now `yourFriend` has added `yourAcquaintance` to `test-app/test-board`. At least
 
 ## Streaming Reads
 
-Datanow has the ability to stream data in real time using the `--stream` flag. Try it by opening up 2 terminal windows and running this in one
+DataNow has the ability to stream data in real time using the `--stream` flag. Try it by opening up 2 terminal windows and running this in one
 ```
-datanow set --board test-app/temp
+datanow set --board test-app/temperature
 datanow read --format plot --stream
 ```
 and this in the other
@@ -238,3 +238,31 @@ for i in {5..15}; do   datanow write -- $i; done
 ```
 You should see the plot updating in realtime.
 ![streaming example](http://i.gyazo.com/73c4636607dd275ecd21d492a466872b.gif)
+
+
+## Paging, Limits & Ordering
+
+If you only want to get the first few data points, you can impose a limit when reading using the `--limit` flag.
+```
+datanow read --board test-app/temperature --limit 3
+# Prints -3, -3, -2
+```
+
+We call this a _page_ of data. This is most useful when dealing with large datasets. The largest and default limit you can set is 50.
+
+To get the next page, use the `--page` flag.
+```
+datanow read --board test-app/temperature --limit 3 --page 2
+# Prints -1, 0, 1
+```
+
+To get the latest data instead of the oldest, use the `--reverse` flag.
+```
+datanow read --board test-app/temperature --limit 3 --page 1 --reverse
+# Prints 5, 5, 4
+```
+
+The `--reverse` flag can be very useful. If you prefer it as the default, use the `set` command.
+```
+
+```

@@ -167,19 +167,23 @@ DataNow.prototype = {
       callback = _callback;
     }
 
-    log.debug('read', namespace);
-
     var url = self.buildUrl(namespace) + '/data';
     var separator = '?';
-    if (readOpts && readOpts.limit) {
-      url += separator + 'limit=' + readOpts.limit;
-      separator = '&';
+    if (readOpts) {
+      var keys = Object.keys(readOpts);
+      for (var i = 0; i < keys.length; i++) {
+        if (readOpts[keys[i]]) {
+          url += separator + keys[i] + '=' + readOpts[keys[i]];
+          separator = '&';
+        }
+      }
     }
-    if (readOpts && readOpts.page) {
-      url += separator + 'page=' + readOpts.page;
+    if (!(readOpts && readOpts.reverse) && self.options.reverse) {
+      url += separator + 'reverse=' + self.options.reverse;
       separator = '&';
     }
 
+    log.debug('read', url);
     request.get(url,
       self.genericResponseHandler('read', function(err, body) {
         callback(err, body);
