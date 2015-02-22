@@ -54,7 +54,10 @@ program
         result.username,
         result.email,
         result.password,
-        helper.genericResponse
+        function(err) {
+          helper.genericResponse(err);
+          console.log('Please check your email before proceeding.');
+        }
       );
     });
   });

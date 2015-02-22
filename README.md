@@ -205,9 +205,9 @@ You can add admin users to your apps and boards. If you add an admin to the app,
 
 Let's create a friend and test it out.
 ```
-datanow register --username yourFriend --email yourFriend@example.com --noLogin
+datanow register --username yourFriend --email yourFriend@example.com
 ```
-Note `yourFriend` doesn't automatically login like before because of the `--noLogin` flag.
+Note `yourFriend` will have to click their email confirmation link before proceeding. 
 ```
 datanow update test-app --addAdmin yourFriend
 datanow logout
