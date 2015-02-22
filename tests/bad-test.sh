@@ -54,6 +54,10 @@ datanow create testApp/singleNumbers number
 for i in {0..5}; do   datanow write -- $i; done
 
 datanow set --board testApp/testBoard --loglevel info
+
+datanow read --board testApp/singleNumbers --limit 3
+datanow read --board testApp/singleNumbers --limit 3 --page 2
+
 datanow read
 
 datanow read --board testApp2/testBoard2

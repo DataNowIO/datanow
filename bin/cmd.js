@@ -274,6 +274,8 @@ program
   .option('-b, --board <app/board>', 'Override the current board.')
   .option('-f, --format <format>', 'Output format (csv, json).')
   .option('-s, --stream', 'Stream data in real time.')
+  .option('-l, --limit <number>', 'Limit of items returned per page (Max & default is 50).')
+  .option('-p, --page <number>', 'Page number to continue from when reading paged data.')
   .option('-d, --delimiter <delimiter>', 'Output format (eg. csv, json, js, plot). Defaults to csv.')
   .action(function(options) {
 
@@ -286,12 +288,16 @@ program
 
     dataNow = new DataNow(config);
 
+    var readOpts = {}
+    readOpts.limit = options.limit ? options.limit : undefined;
+    readOpts.page = options.page ? options.page : undefined;
+
     if (options.board) {
       helper.checkBoard(options.board);
 
-      dataNow.read(options.board, formatter.dataResponse.bind(formatter, options));
+      dataNow.read(options.board, readOpts, formatter.dataResponse.bind(formatter, options));
     } else {
-      dataNow.read(formatter.dataResponse.bind(formatter, options));
+      dataNow.read(readOpts, formatter.dataResponse.bind(formatter, options));
     }
   });
 

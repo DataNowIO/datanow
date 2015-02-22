@@ -139,17 +139,48 @@ DataNow.prototype = {
     );
   },
 
-  read: function(namespace, callback) {
+  read: function(_namespace, _readOpts, _callback) {
     var self = this;
-    log.debug('read', namespace);
 
-    //namespace is optional. Handling it.
-    if (arguments.length == 1) {
-      callback = namespace;
-      namespace = self.options.currentNamespace;
+    //namespace and options are optional. Handling it.
+    var namespace, readOpts, callback;
+    if (arguments.length !== 3) {
+      for (var i = 0; i < arguments.length; i++) {
+        switch (typeof arguments[i]) {
+          case 'string':
+            namespace = arguments[i];
+            break;
+          case 'function':
+            callback = arguments[i];
+            break;
+          case 'object':
+            readOpts = arguments[i];
+            break;
+        }
+      }
+      if (typeof namespace !== 'string') {
+        namespace = self.options.currentNamespace;
+      }
+    } else {
+      namespace = _namespace;
+      readOpts = _readOpts;
+      callback = _callback;
     }
 
-    request.get(self.buildUrl(namespace) + '/data',
+    log.debug('read', namespace);
+
+    var url = self.buildUrl(namespace) + '/data';
+    var separator = '?';
+    if (readOpts && readOpts.limit) {
+      url += separator + 'limit=' + readOpts.limit;
+      separator = '&';
+    }
+    if (readOpts && readOpts.page) {
+      url += separator + 'page=' + readOpts.page;
+      separator = '&';
+    }
+
+    request.get(url,
       self.genericResponseHandler('read', function(err, body) {
         callback(err, body);
 
