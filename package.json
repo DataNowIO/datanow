@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/garrows/datanow-cli.git"
+    "url": "https://github.com/DataNowIO/datanow.git"
   },
   "keywords": [
     "datanow",
@@ -34,9 +34,9 @@
   },
   "license": "GPL v3.0",
   "bugs": {
-    "url": "https://github.com/garrows/datanow-cli/issues"
+    "url": "https://github.com/DataNowIO/datanow/issues"
   },
-  "homepage": "http://datanow.io",
+  "homepage": "https://datanow.io",
   "devDependencies": {
     "mocha": "^2.1.0",
     "should": "^4.4.2"
