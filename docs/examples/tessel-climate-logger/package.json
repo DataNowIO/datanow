@@ -1,8 +1,8 @@
 {
-  "name": "tessel-temp-logger",
+  "name": "tessel-climate-logger",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "tessel-climate-logger.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

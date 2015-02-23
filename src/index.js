@@ -52,13 +52,6 @@ function DataNow(opts) {
 
   //Keep track of options changed after this point and save them to disk.
   self.optionKeysToSave = [];
-
-  if (self.options.token) {
-    log.debug('Using saved auth token');
-    var cookie = request.cookie('user-token=' + self.options.token);
-    cookieJar.setCookie(cookie, self.options.server);
-  }
-
 }
 
 DataNow.prototype = {
@@ -117,7 +110,11 @@ DataNow.prototype = {
     var self = this;
     log.debug('logout');
 
-    request.post(self.options.server + '/api/user/logout',
+    request.post(self.options.server + '/api/user/logout', {
+        json: {
+          token: self.options.token
+        }
+      },
       self.genericResponseHandler('logout', function(err) {
         if (err) {
           return callback(err);
@@ -143,7 +140,8 @@ DataNow.prototype = {
 
     request.post(self.buildUrl(namespace) + '/data', {
         json: {
-          values: data
+          values: data,
+          token: self.options.token
         }
       },
       self.genericResponseHandler('write', callback)
@@ -193,6 +191,10 @@ DataNow.prototype = {
       url += separator + 'reverse=' + self.options.reverse;
       separator = '&';
     }
+    if (self.options.token) {
+      url += separator + 'token=' + self.options.token;
+      separator = '&';
+    }
 
     log.debug('read', url);
     request.get(url,
@@ -231,6 +233,7 @@ DataNow.prototype = {
     if (schema) {
       requestBody.schema = schema;
     }
+    requestBody.token = self.options.token;
     request.put(self.buildUrl(namespace), {
       json: requestBody
     }, function(err, res, body) {
@@ -264,6 +267,7 @@ DataNow.prototype = {
     log.debug('remove', namespace);
 
     var requestBody = {};
+    requestBody.token = self.options.token;
     request.del(self.buildUrl(namespace), {
       json: requestBody
     }, function(err, res, body) {
@@ -281,7 +285,8 @@ DataNow.prototype = {
 
     request.put(self.buildUrl(namespace) + '/admins', {
       json: {
-        username: username
+        username: username,
+        token: self.options.token
       }
     }, self.genericResponseHandler('addAdmin', callback));
   },
@@ -292,7 +297,8 @@ DataNow.prototype = {
 
     request.del(self.buildUrl(namespace) + '/admins', {
       json: {
-        username: username
+        username: username,
+        token: self.options.token
       }
     }, self.genericResponseHandler('removeAdmin', callback));
   },
