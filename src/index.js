@@ -1,7 +1,6 @@
 var async = require('async'),
   log = require('loglevel'),
   fs = require('fs'),
-  _ = require('lodash'),
   Request = require('request'),
   path = require('path');
 
@@ -12,6 +11,17 @@ var request = Request.defaults({
 
 //TODO: Resign SSL.
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+
+var mergeObject = function(src, target) {
+  var result = JSON.parse(JSON.stringify(target));
+  var keys = Object.keys(src),
+    key;
+  for (var i = 0; i < keys.length; i++) {
+    key = keys[i];
+    result[key] = src[key];
+  }
+  return result;
+}
 
 
 function DataNow(opts) {
@@ -24,7 +34,8 @@ function DataNow(opts) {
   if (fs.existsSync(self.options.config)) {
     try {
       var conf = JSON.parse(fs.readFileSync(self.options.config, 'utf8'));
-      self.options = _.merge(conf, self.options);
+      self.options = mergeObject(conf, self.options);
+
       log.debug('Loaded config', self.options);
     } catch (e) {
       log.error('Error parsing config file.', e);
@@ -345,7 +356,7 @@ DataNow.prototype = {
     if (fs.existsSync(self.options.config)) {
       try {
         var conf = JSON.parse(fs.readFileSync(self.options.config, 'utf8'));
-        optionsToSave = _.merge(conf, optionsToSave);
+        optionsToSave = mergeObject(optionsToSave, conf);
         log.debug('Merged old config', conf, 'to', optionsToSave);
       } catch (e) {
         log.error('Error parsing config file.', e);

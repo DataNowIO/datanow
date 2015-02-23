@@ -1,5 +1,4 @@
-var log = require('loglevel'),
-  _ = require('lodash');
+var log = require('loglevel');
 
 var helper = module.exports = {
 
@@ -60,7 +59,7 @@ var helper = module.exports = {
     var data = board.data;
     var CliGraph = require("cli-graph");
 
-    if (_.isEqual(board.schema, ['number'])) {
+    if (board.schema.length == 1 && board.schema[0] == 'number') {
       var MAX_HEIGHT = process.stdout.rows - 5;
       var MAX_WIDTH = process.stdout.columns / 2 - 1;
       if (data.length > MAX_WIDTH) {
