@@ -24,8 +24,6 @@ climate.on('ready', function() {
           function(err, res) {
             if (err) {
               console.log('Failed writing to datanow', err.stack);
-            } else {
-              console.log('Success.', res);
             }
             setTimeout(loop, 1000);
           }

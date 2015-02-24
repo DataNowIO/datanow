@@ -5,8 +5,10 @@
 
 ## Examples
 
-### [Plot ping times in real time.](/docs/examples/real-time-ping.md)
+* **[Plot ping times in real time.](/docs/examples/real-time-ping.md)**
 ![example plot](http://i.gyazo.com/280ac40e5cfb6483b2e5ea41d3ab9187.gif)
+
+* **[Plot Climate Data From Your House Using a Tessel](/docs/examples/tessel-climate-logger/readme.md)**
 
 ## Setup
 
