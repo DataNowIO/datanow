@@ -2,11 +2,14 @@
 
 A [Tessel](tessel.io) is a wonderfully simple microcontroller with WiFi and simple modules. This example uses the climate module to collect temperature data and plot it in real time.
 
-![tessel](https://s3.amazonaws.com/technicalmachine-assets/technical-io/tessel-red-usb.jpg =250x)
+<img src="https://s3.amazonaws.com/technicalmachine-assets/technical-io/tessel-red-usb.jpg" alt="Tessel" style="width:200px;">
 
 If you haven't used your Tessel before, go through these tutorials first. (Est 10min)
+
 1. [Setup & Install Tessel](http://start.tessel.io/install)
+
 2. [Connect Tessel to Wifi](http://start.tessel.io/wifi)
+
 3. [Climate Module](http://start.tessel.io/modules/climate)
 
 
