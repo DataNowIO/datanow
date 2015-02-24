@@ -350,9 +350,11 @@ program
 
   });
 
-
-
 program.parse(process.argv);
+var noCommand = program.args.length === 0;
+if (noCommand) {
+  program.help();
+}
 
 process.on('exit', function(code) {
   if (dataNow && code == 0) {
