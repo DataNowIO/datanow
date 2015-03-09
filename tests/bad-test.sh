@@ -4,6 +4,7 @@ mongo DataNow --eval "db.dropDatabase()" > /dev/null
 
 rm -f ~/.datanow-config.json
 
+npm uninstall datanow -g
 npm link
 
 datanow set --server http://localhost:3000
@@ -18,53 +19,53 @@ datanow register --username garrows2 --email glen@datanow.io --password g2
 datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
 
 
-datanow create testApp/testBoard
-datanow update testApp --addAdmin garrows2
+datanow create garrows/testBoard
+# datanow update testApp --addAdmin garrows2
 
 
-datanow create testApp2
-datanow create testApp2/testBoard2
+# datanow create testApp2
+# datanow create testApp2/testBoard2
 
 
-datanow write 9
-datanow set --board testApp/testBoard
+# datanow write 9
+# datanow set --board garrows/testBoard
 datanow write 1
-datanow write --board testApp/testBoard 2
-datanow write --board testApp2/testBoard2 `date -u +"%Y-%m-%dT%H:%M:%SZ"` 8
-datanow write --board testApp/testBoard 3
-
-datanow logout
-datanow login --email glen@datanow.io --password g2
-datanow write --board testApp2/testBoard2 7
-
-
-datanow create testApp/testBoard4
-datanow create testApp3
-datanow create testApp3/testBoard3 number number string date
-datanow update testApp3/testBoard3 --addAdmin garrows
-datanow set --board testApp3/testBoard3
-
-datanow write 1 2 chicken `date -u +"%Y-%m-%dT%H:%M:%SZ"`
-datanow logout
-datanow login --email glen.arrowsmith@gmail.com --password g
-datanow write 3 4 duck `date -u +"%Y-%m-%dT%H:%M:%SZ"`
-
-datanow create testApp/singleNumbers number
+datanow write --board garrows/testBoard 2
+# datanow write --board testApp2/testBoard2 `date -u +"%Y-%m-%dT%H:%M:%SZ"` 8
+datanow write --board garrows/testBoard 3
+#
+# datanow logout
+# datanow login --email glen@datanow.io --password g2
+# datanow write --board testApp2/testBoard2 7
+#
+#
+# datanow create garrows/testBoard4
+# datanow create testApp3
+# datanow create testApp3/testBoard3 number number string date
+# datanow update testApp3/testBoard3 --addAdmin garrows
+# datanow set --board testApp3/testBoard3
+#
+# datanow write 1 2 chicken `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+# datanow logout
+# datanow login --email glen.arrowsmith@gmail.com --password g
+# datanow write 3 4 duck `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+#
+datanow create garrows/singleNumbers number
 
 for i in {0..5}; do   datanow write -- $i; done
 
-datanow set --board testApp/testBoard --loglevel info
+datanow set --board garrows/testBoard --loglevel info
 
-datanow read --board testApp/singleNumbers --limit 3
-datanow read --board testApp/singleNumbers --limit 3 --page 2
+datanow read --board garrows/singleNumbers --limit 3
+datanow read --board garrows/singleNumbers --limit 3 --page 2
 
 datanow read
-
-datanow read --board testApp2/testBoard2
-
-datanow read --board testApp3/testBoard3
-
-datanow read --board testApp/singleNumbers --format plot
+#
+# datanow read --board testApp2/testBoard2
+#
+# datanow read --board testApp3/testBoard3
+#
+datanow read --board garrows/singleNumbers --format plot
 
 
 

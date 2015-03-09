@@ -4,10 +4,7 @@ var async = require('async'),
   Request = require('request'),
   path = require('path');
 
-var cookieJar = Request.jar();
-var request = Request.defaults({
-  jar: cookieJar
-});
+var request = Request.defaults({});
 
 //TODO: Resign SSL.
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
@@ -50,6 +47,14 @@ function DataNow(opts) {
 
   self.options.server = self.options.server ? self.options.server : 'https://datanow.io';
 
+  if (self.options.token) {
+    request = Request.defaults({
+      auth: {
+        bearer: self.options.token.token
+      }
+    });
+  }
+
   //Keep track of options changed after this point and save them to disk.
   self.optionKeysToSave = [];
 }
@@ -60,7 +65,7 @@ DataNow.prototype = {
     var self = this;
     log.debug('register', username, email);
 
-    request.post(self.options.server + '/api/user/register', {
+    request.put(self.options.server + '/api/me', {
         json: {
           username: username,
           email: email,
@@ -75,29 +80,30 @@ DataNow.prototype = {
     var self = this;
     log.debug('login', username, email);
 
-    var requestBody = {};
+    var auth = {};
     if (username) {
-      requestBody.username = username;
+      auth.user = username;
     }
     if (email) {
-      requestBody.email = email;
+      auth.user = email;
     }
     if (password) {
-      requestBody.password = password;
+      auth.pass = password;
     }
-    log.debug('login', requestBody);
+    log.debug('login', auth);
 
-    request.post(self.options.server + '/api/user/login', {
-        json: requestBody
+    request.put(self.options.server + '/api/me/authorizations', {
+        auth: auth,
+        json: {
+          appName: 'node-cli',
+          scopes: ['admin']
+        }
       },
-      self.genericResponseHandler('login', function(err) {
+      self.genericResponseHandler('login', function(err, token) {
         if (err) {
           return callback(err);
         }
-        var cookies = cookieJar.getCookieString(self.options.server);
-        var re = new RegExp('[; ]user-token=([^\\s;]*)');
-        var token = (' ' + cookies).match(re)[1];
-        log.debug('token cookies', token);
+        log.debug('token', token);
         self.config({
           token: token
         });
@@ -241,20 +247,8 @@ DataNow.prototype = {
         return callback(err);
       }
       log.debug('create response', body);
-      //Check the auto create app feature & conditions
-      if (autoCreateApp && res.statusCode == 404 && namespace.indexOf('/') != -1) {
-        log.debug('App not found, auto creating');
-        //Create the app
-        var appNamespace = namespace.split('/')[0];
-        self.create(appNamespace, null, false, function(err) {
-          if (err) {
-            return callback(err);
-          }
-          log.debug('Created app. Creating board', namespace);
-          //Retry creating the board
-          return self.create(namespace, schema, false, callback);
-        });
-      } else if (self.checkForErrors(err, res, body, callback)) {
+
+      if (self.checkForErrors(err, res, body, callback)) {
         return;
       } else {
         callback(null, body);
@@ -390,7 +384,7 @@ DataNow.prototype = {
 
     var split = namespace.split('/');
     var url = self.options.server + '/api';
-    url += '/app/' + split[0];
+    url += '/user/' + split[0];
     if (typeof split[1] !== 'undefined') {
       url += '/board/' + split[1];
     }
