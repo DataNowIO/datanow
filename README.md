@@ -212,7 +212,7 @@ datanow register --username yourFriend --email yourFriend@example.com
 ```
 Note `yourFriend` will have to click their email confirmation link before proceeding.
 ```
-datanow update test-app --addAdmin yourFriend
+datanow collaborator test-app --add yourFriend
 datanow logout
 datanow login --username yourFriend --email yourFriend@example.com
 datanow create test-app/friends-board
@@ -223,7 +223,7 @@ datanow update test-app --removeAdmin yourName
 ```
 Hey! `YourFriend` just removed your admin privilages from your app. That is not very friendly but could be a completely legitimate use case.
 ```
-datanow update test-app/test-board --addAdmin yourAcquaintance
+datanow collaborator test-app/test-board --add yourAcquaintance
 ```
 Now `yourFriend` has added `yourAcquaintance` to `test-app/test-board`. At least `yourAcquaintance` doesn't have permission to create any boards in your `test-app`.
 
