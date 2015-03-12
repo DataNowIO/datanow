@@ -3,14 +3,21 @@ var log = require('loglevel'),
 
 var helper = module.exports = {
 
-  genericResponse: function(err) {
+  genericResponse: function (err) {
     if (err) {
       return helper.genericError(err);
     }
     log.debug('Success.');
   },
 
-  genericError: function(err) {
+  collaboratorsListResponse: function (err, collaborators) {
+    if (err) {
+      return helper.genericError(err);
+    }
+    log.info(collaborators);
+  },
+
+  genericError: function (err) {
     if (err instanceof Error) {
       log.error(err.message || err);
       log.debug(err.stack);
@@ -20,7 +27,7 @@ var helper = module.exports = {
     process.exit(1);
   },
 
-  required: function(required, config) {
+  required: function (required, config) {
     for (var i = 0; i < required.length; i++) {
       if (config[required[i]] === undefined) {
         helper.genericError('Missing required parameter: ' + required[i] + '.');
@@ -28,13 +35,13 @@ var helper = module.exports = {
     }
   },
 
-  checkBoard: function(board) {
+  checkBoard: function (board) {
     if (board.indexOf('/') === -1) {
       return helper.genericError('Specified board is not in the correct format (eg appName/boardName).');
     }
   },
 
-  promptMissingCredentials: function(program, isRegister, callback) {
+  promptMissingCredentials: function (program, isRegister, callback) {
     //Ask for username, email and/or password depending on what was supplied
     prompt.message = '';
     prompt.delimiter = '';
@@ -75,7 +82,7 @@ var helper = module.exports = {
       };
     }
 
-    prompt.get(schema, function(err, result) {
+    prompt.get(schema, function (err, result) {
       if (result.usernameOrEmail) {
         if (result.usernameOrEmail.indexOf('@') === -1) {
           result.username = result.usernameOrEmail;

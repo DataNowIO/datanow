@@ -36,7 +36,7 @@ program
 	.option('-u, --username <username>', 'User\'s desired username.')
 	.option('-e, --email <email>', 'User\'s email address.')
 	.option('-p, --password <password>', 'User\'s password.')
-	.action(function(options) {
+	.action(function (options) {
 
 		setParentConfig(options.parent, config);
 
@@ -46,7 +46,7 @@ program
 
 		dataNow = new DataNow(config);
 
-		helper.promptMissingCredentials(config, true, function(err, result) {
+		helper.promptMissingCredentials(config, true, function (err, result) {
 			if (err) {
 				return helper.genericError(err);
 			}
@@ -54,7 +54,7 @@ program
 				result.username,
 				result.email,
 				result.password,
-				function(err) {
+				function (err) {
 					helper.genericResponse(err);
 					console.log('Please check your email before proceeding.');
 				}
@@ -70,7 +70,7 @@ program
 	.option('-u, --username <username>', 'User\'s desired username.')
 	.option('-e, --email <email>', 'User\'s email address.')
 	.option('-p, --password <password>', 'User\'s password.')
-	.action(function(options) {
+	.action(function (options) {
 
 		setParentConfig(options.parent, config);
 
@@ -81,7 +81,7 @@ program
 		dataNow = new DataNow(config);
 
 		//TODO: only require username or email
-		helper.promptMissingCredentials(config, false, function(err, result) {
+		helper.promptMissingCredentials(config, false, function (err, result) {
 			if (err) {
 				return helper.genericError(err);
 			}
@@ -98,7 +98,7 @@ program
 program
 	.command('logout')
 	.description('logout of datanow.io and delete saved tokens.')
-	.action(function(options) {
+	.action(function (options) {
 
 		setParentConfig(options.parent, config);
 
@@ -114,7 +114,7 @@ program
 	.description('create a app or board. (e.g. datanow create testApp/testBoard date number)')
 	.option('-U, --dontUse', 'Don\'t automatically use the new board.')
 	.option('-F, --dontForce', 'Don\'t force auto creation of the app if it doesn\'t exist')
-	.action(function(namespace, schema, options) {
+	.action(function (namespace, schema, options) {
 
 		setParentConfig(options.parent, config);
 
@@ -141,13 +141,13 @@ program
 	.command('delete <app/board>')
 	.description('delete a app or board.')
 	.option('-y, --yes', 'Don\'t confirm.')
-	.action(function(namespace, options) {
+	.action(function (namespace, options) {
 
 		setParentConfig(options.parent, config);
 
 		dataNow = new DataNow(config);
 
-		var deleteIt = function() {
+		var deleteIt = function () {
 			dataNow.delete(
 				namespace,
 				helper.genericResponse
@@ -171,7 +171,7 @@ program
 					}
 				}
 			}
-			prompt.get(schema, function(err, result) {
+			prompt.get(schema, function (err, result) {
 				if (result.confirm.toLowerCase() == 'y') {
 					deleteIt();
 				}
@@ -183,32 +183,24 @@ program
 	});
 
 program
-	.command('collaborator <app/board>')
-	.description('Add or remove a board\'s admin.')
+	.command('collaborators <app/board>')
+	.description('List, add or remove a board\'s collaborators.')
+	.option('-l, --list', 'List collaborators.')
 	.option('-a, --add <username>', 'Authorize a user as an admin to this app or board.')
 	.option('-r, --remove <username>', 'Deauthorize a user as an admin to this app or board.')
-	.action(function(namespace, options) {
+	.action(function (namespace, options) {
 
 		setParentConfig(options.parent, config);
 
 		dataNow = new DataNow(config);
 
-		async.parallel([
-			function(done) {
-				if (options.add) {
-					dataNow.addCollaborator(namespace, options.add, done);
-				} else {
-					done();
-				}
-			},
-			function(done) {
-				if (options.remove) {
-					dataNow.removeCollaborator(namespace, options.remove, done);
-				} else {
-					done();
-				}
-			}
-		], helper.genericResponse);
+		if (options.add) {
+			dataNow.addCollaborator(namespace, options.add, helper.genericResponse);
+		} else if (options.remove) {
+			dataNow.removeCollaborator(namespace, options.remove, helper.genericResponse);
+		} else {
+			dataNow.getCollaborators(namespace, helper.collaboratorsListResponse);
+		}
 
 	});
 
@@ -217,22 +209,21 @@ program
 	.description('Add or remove a board\'s admin.')
 	.option('-d, --description <description>', 'The boards description.')
 	.option('-p, --private <isPrivate>', 'Is the board private from the internet.')
-	.action(function(namespace, options) {
+	.action(function (namespace, options) {
 
 		setParentConfig(options.parent, config);
 
 		dataNow = new DataNow(config);
 
 		async.parallel([
-			function(done) {
+			function (done) {
 				if (options.addCollaborator) {
-					dataNow.addCollaborator
-					addCollaborator(namespace, options.addCollaborator, done);
+					dataNow.addCollaborator(namespace, options.addCollaborator, done);
 				} else {
 					done();
 				}
 			},
-			function(done) {
+			function (done) {
 				if (options.removeAdmin) {
 					dataNow.removeAdmin(namespace, options.removeAdmin, done);
 				} else {
@@ -248,13 +239,13 @@ program
 	.command('write [data] [moreData...]')
 	.description('Write data to a board (string, date, number).')
 	.option('-b, --board <app/board>', 'Override the current board.')
-	.action(function(data, moreData, options) {
+	.action(function (data, moreData, options) {
 
 		setParentConfig(options.parent, config);
 
 		dataNow = new DataNow(config);
 
-		var write = function(dataArr, callback) {
+		var write = function (dataArr, callback) {
 			if (typeof callback != 'function') {
 				callback = helper.genericResponse;
 			}
@@ -278,9 +269,9 @@ program
 			process.stdin.resume();
 			process.stdin.setEncoding('utf8');
 
-			process.stdin.on('data', function(chunk) {
+			process.stdin.on('data', function (chunk) {
 
-				write([chunk], function(err) {
+				write([chunk], function (err) {
 					if (err) {
 						return helper.genericError(err);
 					}
@@ -288,7 +279,7 @@ program
 				});
 			});
 
-			process.stdin.on('end', function() {
+			process.stdin.on('end', function () {
 				log.debug('Ended stdin stream.');
 			});
 		} else {
@@ -308,7 +299,7 @@ program
 	.option('-p, --page <number>', 'Page number to continue from when reading paged data. (ie. Page 1 is the latest data)')
 	.option('-r, --reverse [true|false]', 'Reverse the dataset on reads (Newest first).')
 	.option('-d, --delimiter <delimiter>', 'Output format (eg. csv, json, js, plot). Defaults to csv.')
-	.action(function(options) {
+	.action(function (options) {
 
 		setParentConfig(options.parent, config);
 
@@ -344,7 +335,7 @@ program
 	.option('-t, --token <token>', 'Token to use (Overrides config file).')
 	.option('-t, --server <server>', 'Server to use (Overrides https://datanow.io).')
 	.option('-l, --loglevel <level>', 'Set logging level (trace, debug, info, warn, error). Defaults to info.')
-	.action(function(options) {
+	.action(function (options) {
 
 		setParentConfig(options.parent, config);
 
@@ -380,13 +371,16 @@ program
 
 	});
 
-program.parse(process.argv);
-var noCommand = program.args.length === 0;
-if (noCommand) {
-	program.help();
-}
+program
+	.command('*')
+	.description('Displays help.')
+	.action(function (options) {
+		program.help();
+	});
 
-process.on('exit', function(code) {
+program.parse(process.argv);
+
+process.on('exit', function (code) {
 	if (dataNow && code == 0) {
 		dataNow.save();
 	}

@@ -9,7 +9,7 @@ var request = Request.defaults({});
 //TODO: Resign SSL.
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-var mergeObject = function(src, target) {
+var mergeObject = function (src, target) {
 	var result = JSON.parse(JSON.stringify(target));
 	var keys = Object.keys(src),
 		key;
@@ -61,7 +61,7 @@ function DataNow(opts) {
 
 DataNow.prototype = {
 
-	register: function(username, email, password, callback) {
+	register: function (username, email, password, callback) {
 		var self = this;
 		log.debug('register', username, email);
 
@@ -76,7 +76,7 @@ DataNow.prototype = {
 		);
 	},
 
-	login: function(username, email, password, callback) {
+	login: function (username, email, password, callback) {
 		var self = this;
 		log.debug('login', username, email);
 
@@ -99,7 +99,7 @@ DataNow.prototype = {
 					scopes: ['admin']
 				}
 			},
-			self.genericResponseHandler('login', function(err, token) {
+			self.genericResponseHandler('login', function (err, token) {
 				if (err) {
 					return callback(err);
 				}
@@ -112,7 +112,7 @@ DataNow.prototype = {
 		);
 	},
 
-	logout: function(callback) {
+	logout: function (callback) {
 		var self = this;
 		log.debug('logout');
 
@@ -121,7 +121,7 @@ DataNow.prototype = {
 					token: self.options.token
 				}
 			},
-			self.genericResponseHandler('logout', function(err) {
+			self.genericResponseHandler('logout', function (err) {
 				if (err) {
 					return callback(err);
 				}
@@ -133,7 +133,7 @@ DataNow.prototype = {
 		);
 	},
 
-	write: function(namespace, data, callback) {
+	write: function (namespace, data, callback) {
 		var self = this;
 
 		//namespace is optional. Handling it.
@@ -154,7 +154,7 @@ DataNow.prototype = {
 		);
 	},
 
-	read: function(_namespace, _readOpts, _callback) {
+	read: function (_namespace, _readOpts, _callback) {
 		var self = this;
 
 		//namespace and options are optional. Handling it.
@@ -162,15 +162,15 @@ DataNow.prototype = {
 		if (arguments.length !== 3) {
 			for (var i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
-					case 'string':
-						namespace = arguments[i];
-						break;
-					case 'function':
-						callback = arguments[i];
-						break;
-					case 'object':
-						readOpts = arguments[i];
-						break;
+				case 'string':
+					namespace = arguments[i];
+					break;
+				case 'function':
+					callback = arguments[i];
+					break;
+				case 'object':
+					readOpts = arguments[i];
+					break;
 				}
 			}
 			if (typeof namespace !== 'string') {
@@ -204,16 +204,16 @@ DataNow.prototype = {
 
 		log.debug('read', url);
 		request.get(url,
-			self.genericResponseHandler('read', function(err, body) {
+			self.genericResponseHandler('read', function (err, body) {
 				callback(err, body);
 
 				if (self.options.stream) {
 					log.debug('stream read');
 					var socket = require('socket.io-client')(self.options.server);
-					socket.on('connect', function() {
+					socket.on('connect', function () {
 						log.debug('socket connected');
 					});
-					socket.on(namespace, function(msg) {
+					socket.on(namespace, function (msg) {
 						log.debug('socket got data', msg);
 						if (self.options.reprintEntireData) {
 							body.data = body.data.concat(msg.data);
@@ -222,7 +222,7 @@ DataNow.prototype = {
 							callback(undefined, msg);
 						}
 					});
-					socket.on('disconnect', function() {
+					socket.on('disconnect', function () {
 						log.debug('socket disconnect');
 					});
 				}
@@ -231,7 +231,7 @@ DataNow.prototype = {
 		);
 	},
 
-	create: function(namespace, schema, autoCreateApp, callback) {
+	create: function (namespace, schema, autoCreateApp, callback) {
 		var self = this;
 		log.debug('create', namespace);
 
@@ -242,7 +242,7 @@ DataNow.prototype = {
 		requestBody.token = self.options.token;
 		request.put(self.buildUrl(namespace), {
 			json: requestBody
-		}, function(err, res, body) {
+		}, function (err, res, body) {
 			if (err) {
 				return callback(err);
 			}
@@ -256,7 +256,7 @@ DataNow.prototype = {
 		});
 	},
 
-	delete: function(namespace, callback) {
+	delete: function (namespace, callback) {
 		var self = this;
 		log.debug('remove', namespace);
 
@@ -264,7 +264,7 @@ DataNow.prototype = {
 		requestBody.token = self.options.token;
 		request.del(self.buildUrl(namespace), {
 			json: requestBody
-		}, function(err, res, body) {
+		}, function (err, res, body) {
 			if (err) {
 				return callback(err);
 			}
@@ -273,31 +273,40 @@ DataNow.prototype = {
 		});
 	},
 
-	addCollaborator: function(namespace, username, callback) {
+	addCollaborator: function (namespace, username, callback) {
 		var self = this;
 		log.debug('addCollaborator', namespace, username);
 
 		request.put(self.buildUrl(namespace) + '/collaborators/' + username, {
 			json: {
-				username: username,
 				token: self.options.token
 			}
 		}, self.genericResponseHandler('addCollaborator', callback));
 	},
 
-	removeCollaborator: function(namespace, username, callback) {
+	removeCollaborator: function (namespace, username, callback) {
 		var self = this;
 		log.debug('removeCollaborator', namespace, username);
 
 		request.del(self.buildUrl(namespace) + '/collaborators/' + username, {
 			json: {
-				username: username,
 				token: self.options.token
 			}
 		}, self.genericResponseHandler('removeCollaborator', callback));
 	},
 
-	config: function(config) {
+	getCollaborators: function (namespace, callback) {
+		var self = this;
+		log.debug('getCollaborators', namespace);
+
+		request.get(self.buildUrl(namespace) + '/collaborators', {
+			json: {
+				token: self.options.token
+			}
+		}, self.genericResponseHandler('getCollaborators', callback));
+	},
+
+	config: function (config) {
 		var self = this;
 
 		var keys = Object.keys(config),
@@ -314,7 +323,7 @@ DataNow.prototype = {
 		}
 	},
 
-	checkForErrors: function(err, res, body, callback) {
+	checkForErrors: function (err, res, body, callback) {
 		var self = this;
 		if (err) {
 			callback(err);
@@ -336,7 +345,7 @@ DataNow.prototype = {
 		return false;
 	},
 
-	save: function(callback) {
+	save: function (callback) {
 		var self = this;
 
 		if (self.optionKeysToSave.length === 0) {
@@ -369,7 +378,7 @@ DataNow.prototype = {
 			flag: 'w+'
 		};
 		if (typeof callback === 'function') {
-			fs.writeFile(self.options.config, json, fileOpts, function(err) {
+			fs.writeFile(self.options.config, json, fileOpts, function (err) {
 				log.debug('done writing config', optionsToSave);
 				callback(err);
 			});
@@ -379,7 +388,7 @@ DataNow.prototype = {
 		}
 	},
 
-	buildUrl: function(namespace) {
+	buildUrl: function (namespace) {
 		var self = this;
 
 		var split = namespace.split('/');
@@ -391,9 +400,9 @@ DataNow.prototype = {
 		return url;
 	},
 
-	genericResponseHandler: function(source, callback) {
+	genericResponseHandler: function (source, callback) {
 		var self = this;
-		return function(err, res, body) {
+		return function (err, res, body) {
 			if (self.checkForErrors(err, res, body, callback)) {
 				return;
 			}

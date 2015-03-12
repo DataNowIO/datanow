@@ -41,54 +41,54 @@ var server = nock('https://datanow.io')
 var DataNow = require('../src/index.js');
 
 
-describe('DataNow', function() {
+describe('DataNow', function () {
 
-  it('should initialize', function() {
+  it('should initialize', function () {
     var dataNow = new DataNow({
       loglevel: 'error'
     });
     should(dataNow).be.ok;
   });
 
-  describe('initialized', function() {
+  describe('initialized', function () {
 
     var dataNow;
-    before(function() {
+    before(function () {
       dataNow = new DataNow({
         loglevel: 'debug'
       });
     });
 
-    it('should register and login', function(testsDone) {
-      dataNow.register(username, email, password, true, function(err) {
+    it('should register and login', function (testsDone) {
+      dataNow.register(username, email, password, true, function (err) {
         should(err).not.exist;
         testsDone(err);
       });
     });
 
-    it('should create app', function(testsDone) {
-      dataNow.newApp(appName, function(err) {
+    it('should create app', function (testsDone) {
+      dataNow.newApp(appName, function (err) {
         should(err).not.exist;
         testsDone(err);
       });
     });
 
-    it('should create board', function(testsDone) {
-      dataNow.newBoard(appName, boardName, function(err) {
+    it('should create board', function (testsDone) {
+      dataNow.newBoard(appName, boardName, function (err) {
         should(err).not.exist;
         testsDone(err);
       });
     });
 
-    it('should write data', function(testsDone) {
-      dataNow.write(appName, boardName, 1, function(err) {
+    it('should write data', function (testsDone) {
+      dataNow.write(appName, boardName, 1, function (err) {
         should(err).not.exist;
         testsDone(err);
       });
     });
 
-    it('should read data', function(testsDone) {
-      dataNow.read(appName, boardName, function(err, data) {
+    it('should read data', function (testsDone) {
+      dataNow.read(appName, boardName, function (err, data) {
         should(err).not.exist;
         testsDone(err);
         should(data).be.ok;

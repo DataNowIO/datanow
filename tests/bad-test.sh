@@ -20,7 +20,8 @@ datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
 
 
 datanow create garrows/testBoard
-datanow collaborator garrows/testBoard --add garrows2
+datanow collaborators garrows/testBoard --add garrows2
+datanow collaborators garrows/testBoard --list
 exit 1
 
 datanow create garrows/testBoard2

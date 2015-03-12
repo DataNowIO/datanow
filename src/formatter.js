@@ -2,16 +2,16 @@ var log = require('loglevel');
 
 var helper = module.exports = {
 
-  dataResponse: function(options, err, board) {
-    if (err) {
+  dataResponse: function (options, err, board) {
+    if(err) {
       log.error(err.message || err);
       log.debug(err.stack);
       process.exit(1);
     }
-    if (typeof options.format == 'undefined') {
+    if(typeof options.format == 'undefined') {
       options.format = 'csv';
     }
-    if (typeof this[options.format] !== 'function') {
+    if(typeof this[options.format] !== 'function') {
       log.warn('Unknown format. Defaulting to csv.');
       options.format = 'csv';
     }
@@ -19,31 +19,31 @@ var helper = module.exports = {
     this[options.format](board, options);
   },
 
-  json: function(board, options) {
+  json: function (board, options) {
     var data = board.data;
     console.log(JSON.stringify(data));
   },
 
-  js: function(board, options) {
+  js: function (board, options) {
     var data = board.data;
     console.log(data);
   },
 
-  csv: function(board, options) {
+  csv: function (board, options) {
 
     function doCsv(data) {
-      if (data instanceof Array) {
-        for (var i = 0; i < data.length; i++) {
+      if(data instanceof Array) {
+        for(var i = 0; i < data.length; i++) {
           doCsv(data[i]);
-          if (data[i] instanceof Array) {
+          if(data[i] instanceof Array) {
             console.log();
-          } else if (i < data.length - 1) {
+          } else if(i < data.length - 1) {
             process.stdout.write(options.delimiter || ', ');
           }
         }
       } else {
         var str = data.toString();
-        if (/[\n,"]/.test(str)) {
+        if(/[\n,"]/.test(str)) {
           process.stdout.write('"' + str + '"');
         } else {
           process.stdout.write(str);
@@ -55,24 +55,24 @@ var helper = module.exports = {
     console.log();
   },
 
-  plot: function(board, options) {
+  plot: function (board, options) {
     var data = board.data;
     var CliGraph = require("cli-graph");
 
-    if (board.schema.length == 1 && board.schema[0] == 'number') {
+    if(board.schema.length == 1 && board.schema[0] == 'number') {
       var MAX_HEIGHT = process.stdout.rows - 5;
       var MAX_WIDTH = process.stdout.columns / 2 - 1;
-      if (data.length > MAX_WIDTH) {
+      if(data.length > MAX_WIDTH) {
         data = data.slice(data.length - MAX_WIDTH);
       }
       //Find the max, min, sum and mean;
       var max, min, mean, sum = 0;
-      for (var i = 0; i < data.length; i++) {
+      for(var i = 0; i < data.length; i++) {
         var x = data[i];
-        if (typeof max == 'undefined' || x > max) {
+        if(typeof max == 'undefined' || x > max) {
           max = x;
         }
-        if (typeof min == 'undefined' || x < min) {
+        if(typeof min == 'undefined' || x < min) {
           min = x;
         }
         sum += x;
@@ -83,7 +83,7 @@ var helper = module.exports = {
 
       var scaler = MAX_HEIGHT / max;
 
-      if (min > 0) {
+      if(min > 0) {
         height = max * scaler + 2;
         centerY = height - 1;
       } else {
@@ -98,8 +98,8 @@ var helper = module.exports = {
           x: 0,
           y: centerY
         }
-      }).setFunction(function(x) {
-        if (x < 0) return null;
+      }).setFunction(function (x) {
+        if(x < 0) return null;
         return data[x] * scaler;
       });
       console.log(g1.toString());
