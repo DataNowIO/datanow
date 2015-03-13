@@ -5,6 +5,8 @@ var child_process = require('child_process'),
 
 describe('Integration', function () {
 
+	var now = (new Date()).toISOString();
+
 	before(function (doneBefore) {
 		async.waterfall([
 			function (waterfallDone) {
@@ -95,6 +97,25 @@ describe('Integration', function () {
 				collaborators[0].username.should.eql('homer');
 				testDone(err);
 			});
+		});
+	});
+
+	it('should write data to the board', function (testDone) {
+
+		exec('datanow write ' + now + ' 1', function (err, output) {
+			testDone(err);
+		});
+	});
+
+	it('should read data to the board', function (testDone) {
+
+		exec('datanow read --format json', function (err, output) {
+			var data = JSON.parse(output);
+			data.should.be.instanceof(Array);
+			data.should.eql([
+				[now, 1]
+			]);
+			testDone(err);
 		});
 	});
 
