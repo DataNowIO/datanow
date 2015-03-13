@@ -1,11 +1,14 @@
 var child_process = require('child_process'),
 	should = require('should'),
 	async = require('async'),
+	path = require('path'),
+	fs = require('fs'),
 	exec = require('child_process').exec;;
 
 describe('Integration', function () {
 
-	var now = (new Date()).toISOString();
+	var now = (new Date()).toISOString(),
+		authToken;
 
 	before(function (doneBefore) {
 		async.waterfall([
@@ -56,6 +59,11 @@ describe('Integration', function () {
 	it('should login', function (testDone) {
 
 		exec('datanow login --username homer --email glen+homer@datanow.io --password password1', function (err, output) {
+			var configPath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + '/.datanow-config.json';
+			var config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+			config.token.should.be.object;
+			config.token.token.should.be.ok;
+			authToken = config.token.token;
 			testDone(err);
 		});
 	});
@@ -116,6 +124,28 @@ describe('Integration', function () {
 				[now, 1]
 			]);
 			testDone(err);
+		});
+	});
+
+	it('should logout', function (testDone) {
+
+		exec('datanow logout', function (err, output) {
+			testDone(err);
+		});
+	});
+
+	it('should fail writing data when logged out', function (testDone) {
+
+		exec('datanow write ' + now + ' 1', function (err, output) {
+			should(err).be.ok;
+			testDone();
+		});
+	});
+
+	it('should fail writing data when using an invalidated token', function (testDone) {
+		exec('datanow write ' + now + ' 1 --token ' + authToken, function (err, output) {
+			should(err).be.ok;
+			testDone();
 		});
 	});
 

@@ -9,13 +9,15 @@ var request = Request.defaults({});
 //TODO: Resign SSL.
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-var mergeObject = function (src, target) {
+var mergeObject = function (src, target, overWriteWithNulls) {
 	var result = JSON.parse(JSON.stringify(target));
 	var keys = Object.keys(src),
 		key;
 	for (var i = 0; i < keys.length; i++) {
 		key = keys[i];
-		result[key] = src[key];
+		if (src[key] !== null || overWriteWithNulls) {
+			result[key] = src[key];
+		}
 	}
 	return result;
 }
@@ -31,7 +33,7 @@ function DataNow(opts) {
 	if (fs.existsSync(self.options.config)) {
 		try {
 			var conf = JSON.parse(fs.readFileSync(self.options.config, 'utf8'));
-			self.options = mergeObject(conf, self.options);
+			self.options = mergeObject(conf, self.options, false);
 
 			log.debug('Loaded config', self.options);
 		} catch (e) {
@@ -48,9 +50,10 @@ function DataNow(opts) {
 	self.options.server = self.options.server ? self.options.server : 'https://datanow.io';
 
 	if (self.options.token) {
+		var token = self.options.token.token ? self.options.token.token : self.options.token;
 		request = Request.defaults({
 			auth: {
-				bearer: self.options.token.token
+				bearer: token
 			}
 		});
 	}
@@ -116,11 +119,7 @@ DataNow.prototype = {
 		var self = this;
 		log.debug('logout');
 
-		request.del(self.options.server + '/api/me/authorizations', {
-				json: {
-					token: self.options.token
-				}
-			},
+		request.del(self.options.server + '/api/me/authorizations',
 			self.genericResponseHandler('logout', function (err) {
 				if (err) {
 					return callback(err);
@@ -146,8 +145,7 @@ DataNow.prototype = {
 
 		request.post(self.buildUrl(namespace) + '/data', {
 				json: {
-					values: data,
-					token: self.options.token
+					values: data
 				}
 			},
 			self.genericResponseHandler('write', callback)
@@ -197,10 +195,6 @@ DataNow.prototype = {
 			url += separator + 'reverse=' + self.options.reverse;
 			separator = '&';
 		}
-		if (self.options.token) {
-			url += separator + 'token=' + self.options.token;
-			separator = '&';
-		}
 
 		log.debug('read', url);
 		request.get(url,
@@ -239,14 +233,13 @@ DataNow.prototype = {
 		if (schema) {
 			requestBody.schema = schema;
 		}
-		requestBody.token = self.options.token;
 		request.put(self.buildUrl(namespace), {
 			json: requestBody
 		}, function (err, res, body) {
 			if (err) {
 				return callback(err);
 			}
-			log.debug('create response', body);
+			log.debug('create response', self.buildUrl(namespace), body);
 
 			if (self.checkForErrors(err, res, body, callback)) {
 				return;
@@ -260,11 +253,7 @@ DataNow.prototype = {
 		var self = this;
 		log.debug('remove', namespace);
 
-		var requestBody = {};
-		requestBody.token = self.options.token;
-		request.del(self.buildUrl(namespace), {
-			json: requestBody
-		}, function (err, res, body) {
+		request.del(self.buildUrl(namespace), function (err, res, body) {
 			if (err) {
 				return callback(err);
 			}
@@ -277,33 +266,21 @@ DataNow.prototype = {
 		var self = this;
 		log.debug('addCollaborator', namespace, username);
 
-		request.put(self.buildUrl(namespace) + '/collaborators/' + username, {
-			json: {
-				token: self.options.token
-			}
-		}, self.genericResponseHandler('addCollaborator', callback));
+		request.put(self.buildUrl(namespace) + '/collaborators/' + username, self.genericResponseHandler('addCollaborator', callback));
 	},
 
 	removeCollaborator: function (namespace, username, callback) {
 		var self = this;
 		log.debug('removeCollaborator', namespace, username);
 
-		request.del(self.buildUrl(namespace) + '/collaborators/' + username, {
-			json: {
-				token: self.options.token
-			}
-		}, self.genericResponseHandler('removeCollaborator', callback));
+		request.del(self.buildUrl(namespace) + '/collaborators/' + username, self.genericResponseHandler('removeCollaborator', callback));
 	},
 
 	getCollaborators: function (namespace, callback) {
 		var self = this;
 		log.debug('getCollaborators', namespace);
 
-		request.get(self.buildUrl(namespace) + '/collaborators', {
-			json: {
-				token: self.options.token
-			}
-		}, self.genericResponseHandler('getCollaborators', callback));
+		request.get(self.buildUrl(namespace) + '/collaborators', self.genericResponseHandler('getCollaborators', callback));
 	},
 
 	config: function (config) {
@@ -365,7 +342,7 @@ DataNow.prototype = {
 		if (fs.existsSync(self.options.config)) {
 			try {
 				var conf = JSON.parse(fs.readFileSync(self.options.config, 'utf8'));
-				optionsToSave = mergeObject(optionsToSave, conf);
+				optionsToSave = mergeObject(optionsToSave, conf, true);
 				log.debug('Merged old config', conf, 'to', optionsToSave);
 			} catch (e) {
 				log.error('Error parsing config file.', e);
