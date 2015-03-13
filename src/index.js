@@ -116,7 +116,7 @@ DataNow.prototype = {
 		var self = this;
 		log.debug('logout');
 
-		request.post(self.options.server + '/api/user/logout', {
+		request.del(self.options.server + '/api/me/authorizations', {
 				json: {
 					token: self.options.token
 				}

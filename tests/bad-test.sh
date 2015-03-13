@@ -19,24 +19,24 @@ datanow register --username garrows2 --email glen@datanow.io --password g2
 datanow login --username garrows --email glen.arrowsmith@gmail.com --password g
 
 
-datanow create garrows/testBoard
-datanow collaborators garrows/testBoard --add garrows2
-datanow collaborators garrows/testBoard --list
-exit 1
+datanow create garrows/test-board-up
+datanow collaborators garrows/test-board-up --add garrows2
+datanow collaborators garrows/test-board-up --list
 
-datanow create garrows/testBoard2
+datanow create garrows/test-board-down
 
 
 datanow write 9
-datanow set --board garrows/testBoard
+datanow set --board garrows/test-board-up
 datanow write 1
-datanow write --board garrows/testBoard 2
-datanow write --board garrows/testBoard2 `date -u +"%Y-%m-%dT%H:%M:%SZ"` 8
-datanow write --board garrows/testBoard 3
+datanow write --board garrows/test-board-up 2
+datanow write --board garrows/test-board-down `date -u +"%Y-%m-%dT%H:%M:%SZ"` 8
+datanow write --board garrows/test-board-up 3
 
-# datanow logout
+datanow logout
+exit 1
 # datanow login --email glen@datanow.io --password g2
-# datanow write --board garrows/testBoard2 7
+# datanow write --board garrows/test-board-down 7
 #
 #
 # datanow create garrows/testBoard4
@@ -54,14 +54,14 @@ datanow create garrows/singleNumbers number
 
 for i in {0..5}; do   datanow write -- $i; done
 
-datanow set --board garrows/testBoard --loglevel info
+datanow set --board garrows/test-board-up --loglevel info
 
 datanow read --board garrows/singleNumbers --limit 3
 datanow read --board garrows/singleNumbers --limit 3 --page 2
 
 datanow read
 #
-# datanow read --board garrows/testBoard2
+# datanow read --board garrows/test-board-down
 #
 # datanow read --board testApp3/testBoard3
 #
