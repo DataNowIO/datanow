@@ -9,14 +9,16 @@ var request = Request.defaults({});
 //TODO: Resign SSL.
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-var mergeObject = function (src, target, overWriteWithNulls) {
+var mergeObject = function (src, target, overWriteWithNulls, preserveExisting) {
 	var result = JSON.parse(JSON.stringify(target));
 	var keys = Object.keys(src),
 		key;
 	for (var i = 0; i < keys.length; i++) {
 		key = keys[i];
 		if (src[key] !== null || overWriteWithNulls) {
-			result[key] = src[key];
+			if (!(preserveExisting && typeof result[key] != 'undefined')) {
+				result[key] = src[key];
+			}
 		}
 	}
 	return result;
@@ -33,7 +35,7 @@ function DataNow(opts) {
 	if (fs.existsSync(self.options.config)) {
 		try {
 			var conf = JSON.parse(fs.readFileSync(self.options.config, 'utf8'));
-			self.options = mergeObject(conf, self.options, false);
+			self.options = mergeObject(conf, self.options, false, true);
 
 			log.debug('Loaded config', self.options);
 		} catch (e) {
