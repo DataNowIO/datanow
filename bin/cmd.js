@@ -298,7 +298,10 @@ program
 	.option('-l, --limit <number>', 'Limit of items returned per page (Max & default is 50).')
 	.option('-p, --page <number>', 'Page number to continue from when reading paged data. (ie. Page 1 is the latest data)')
 	.option('-r, --reverse [true|false]', 'Reverse the dataset on reads (Newest first).')
-	.option('-d, --delimiter <delimiter>', 'Output format (eg. csv, json, js, plot). Defaults to csv.')
+	.option('-d, --delimiter <delimiter>', 'Delimiter between columns in CSV output. Defaults to ", "')
+	.option('-D, --lineDelimiter <delimiter>', 'Delimiter between rows in CSV output. Defaults to "\\n"')
+	.option('-w, --width <number>', 'Maximum width when using plot format. Defaults to terminal width.')
+	.option('-h, --height <number>', 'Maximum height when using plot format. Defaults to terminal height.')
 	.action(function (options) {
 
 		setParentConfig(options.parent, config);

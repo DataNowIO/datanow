@@ -36,7 +36,7 @@ var helper = module.exports = {
 				for (var i = 0; i < data.length; i++) {
 					doCsv(data[i]);
 					if (data[i] instanceof Array) {
-						console.log();
+						process.stdout.write(options.lineDelimiter || '\n');
 					} else if (i < data.length - 1) {
 						process.stdout.write(options.delimiter || ', ');
 					}
@@ -60,15 +60,15 @@ var helper = module.exports = {
 		var CliGraph = require("cli-graph");
 
 		if (board.schema.length == 1 && board.schema[0] == 'number') {
-			var MAX_HEIGHT = process.stdout.rows - 5;
-			var MAX_WIDTH = process.stdout.columns / 2 - 1;
+			var MAX_HEIGHT = options.height ? options.height : process.stdout.rows - 13;
+			var MAX_WIDTH = options.width ? options.width : process.stdout.columns / 2 - 1;
 			if (data.length > MAX_WIDTH) {
 				data = data.slice(data.length - MAX_WIDTH);
 			}
 			//Find the max, min, sum and mean;
 			var max, min, mean, sum = 0;
 			for (var i = 0; i < data.length; i++) {
-				var x = data[i];
+				var x = parseFloat(data[i]);
 				if (typeof max == 'undefined' || x > max) {
 					max = x;
 				}

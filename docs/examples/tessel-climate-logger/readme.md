@@ -28,17 +28,18 @@ datanow login
 
 Download the [tessel-climate-logger.js](./tessel-climate-logger.js) example into a file and save it.
 
-Now create a board to post the temperature to replacing `yourname`.
+Now create a board to post the temperature to replacing `your-username`.
 ```
-datanow create yourname/climate number
+datanow create your-username/climate number
 ```
-Replace `yourname/climate` in `tessel-climate-logger.js` too.
+Replace `your-username/climate` in `tessel-climate-logger.js` too.
 
 
 DataNow stores an authentication token in a config file after logging in. We are going to use that auth token in the code so we don't have to login in the code.
-Copy the long string after the `user-token` field.
+Copy the long string of characters.
 ```
-cat ~/.datanow-config.json
+sudo npm install -g json
+cat ~/.datanow-config.json | json token.token
 ```
 Replace the long string of `xxxxx`s in `tessel-climate-logger.js` with the `user-token` field you just copied. Remember not to share it with anyone else.
 

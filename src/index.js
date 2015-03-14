@@ -210,7 +210,7 @@ DataNow.prototype = {
 					socket.on(namespace, function (msg) {
 						log.debug('socket got data', msg);
 						if (self.options.reprintEntireData) {
-							body.data = body.data.concat(msg.data);
+							body.data = body.data.concat(msg.values);
 							callback(undefined, body);
 						} else {
 							callback(undefined, msg);
