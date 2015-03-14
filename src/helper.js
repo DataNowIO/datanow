@@ -10,11 +10,11 @@ var helper = module.exports = {
 		log.debug('Success.');
 	},
 
-	collaboratorsListResponse: function (err, collaborators) {
+	genericListResponse: function (err, response) {
 		if (err) {
 			return helper.genericError(err);
 		}
-		log.info(JSON.stringify(collaborators, null, 2));
+		log.info(JSON.stringify(response, null, 2));
 	},
 
 	genericError: function (err) {

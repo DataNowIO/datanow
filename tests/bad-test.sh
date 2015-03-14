@@ -64,7 +64,7 @@ datanow read --board homer/test-board-down
 
 datanow read --board marge/test-board-nnsd
 
-datanow read --board homer/singleNumbers --format plot
+datanow read --board homer/singleNumbers --format plot --height 5
 
 
 

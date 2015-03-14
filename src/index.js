@@ -283,6 +283,54 @@ DataNow.prototype = {
 		request.get(self.buildUrl(namespace) + '/collaborators', self.genericResponseHandler('getCollaborators', callback));
 	},
 
+	createToken: function (namespace, scopes, options, callback) {
+		var self = this;
+		namespace = namespace ? namespace : self.options.currentNamespace;
+		log.debug('createToken', namespace, scopes);
+
+		var body = {};
+		if (scopes.length > 0) {
+			body.scopes = scopes;
+		}
+		body.appName = options.appName ? options.appName : 'unnamed-token';
+		request.put(self.buildUrl(namespace) + '/authorizations', {
+			json: body
+		}, self.genericResponseHandler('createToken', callback));
+	},
+
+	updateToken: function (namespace, tokenId, scopes, options, callback) {
+		var self = this;
+		namespace = namespace ? namespace : self.options.currentNamespace;
+		log.debug('updateToken', namespace);
+
+		var body = {};
+		if (scopes.length > 0) {
+			body.scopes = scopes;
+		}
+		if (options.name) {
+			body.appName = options.name;
+		}
+		request.post(self.buildUrl(namespace) + '/authorizations/' + tokenId, {
+			json: body
+		}, self.genericResponseHandler('updateToken', callback));
+	},
+
+	deleteToken: function (namespace, tokenId, callback) {
+		var self = this;
+		namespace = namespace ? namespace : self.options.currentNamespace;
+		log.debug('deleteToken', namespace);
+
+		request.del(self.buildUrl(namespace) + '/authorizations/' + tokenId, self.genericResponseHandler('deleteToken', callback));
+	},
+
+	getTokens: function (namespace, callback) {
+		var self = this;
+		namespace = namespace ? namespace : self.options.currentNamespace;
+		log.debug('getTokens', namespace);
+
+		request.get(self.buildUrl(namespace) + '/authorizations', self.genericResponseHandler('getTokens', callback));
+	},
+
 	config: function (config) {
 		var self = this;
 

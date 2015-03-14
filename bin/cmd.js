@@ -199,7 +199,7 @@ program
 		} else if (options.remove) {
 			dataNow.removeCollaborator(namespace, options.remove, helper.genericResponse);
 		} else {
-			dataNow.getCollaborators(namespace, helper.collaboratorsListResponse);
+			dataNow.getCollaborators(namespace, helper.genericListResponse);
 		}
 
 	});
@@ -231,6 +231,33 @@ program
 				}
 			}
 		], helper.genericResponse);
+
+	});
+
+program
+	.command('tokens [scopes...]')
+	.description('Create/manage board authentication tokens. (e.g. "datanow tokens --create admin create read update delete")')
+	.option('-b, --board <app/board>', 'Override the current board.')
+	.option('-c, --create', 'Create a token.')
+	.option('-c, --update <tokenId>', 'Update the token.')
+	.option('-l, --list', 'List the board\'s tokens.')
+	.option('-d, --delete <tokenId>', 'Delete the token.')
+	.option('-n, --appName <appName>', 'Name the token. Defaults to "unnamed-token".')
+	.action(function (scopes, options) {
+
+		setParentConfig(options.parent, config);
+
+		dataNow = new DataNow(config);
+
+		if (options.create) {
+			dataNow.createToken(options.board, scopes, options, helper.genericListResponse);
+		} else if (options.delete) {
+			dataNow.deleteToken(options.board, options.delete, helper.genericResponse);
+		} else if (options.update) {
+			dataNow.updateToken(options.board, options.update, scopes, options, helper.genericResponse);
+		} else {
+			dataNow.getTokens(options.board, helper.genericListResponse);
+		}
 
 	});
 
