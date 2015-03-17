@@ -1,6 +1,6 @@
 {
   "name": "datanow",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "DataNow.io's command line tool and node SDK.",
   "main": "src/index.js",
   "bin": {
