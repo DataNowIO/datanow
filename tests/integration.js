@@ -3,12 +3,14 @@ var child_process = require('child_process'),
 	async = require('async'),
 	path = require('path'),
 	fs = require('fs'),
-	exec = require('child_process').exec;;
+	exec = require('child_process').exec;
 
 describe('Integration', function () {
+	this.timeout(6000);
 
 	var now = (new Date()).toISOString(),
-		authToken;
+		authToken,
+		createToken;
 
 	before(function (doneBefore) {
 		async.waterfall([
@@ -85,7 +87,12 @@ describe('Integration', function () {
 	it('should list the collaborators', function (testDone) {
 
 		exec('datanow collaborators homer/test-board --list', function (err, output) {
-			var collaborators = JSON.parse(output);
+			try {
+				var collaborators = JSON.parse(output);
+			} catch (e) {
+				console.log('Invalid json', output);
+				should(e).not.be.ok;
+			}
 			collaborators.should.be.instanceof(Array);
 			collaborators.length.should.eql(2);
 			collaborators[0].username.should.eql('homer');
@@ -99,7 +106,12 @@ describe('Integration', function () {
 		exec('datanow collaborators homer/test-board --remove marge', function (err, output) {
 			should(err).not.be.ok;
 			exec('datanow collaborators homer/test-board --list', function (err, output) {
-				var collaborators = JSON.parse(output);
+				try {
+					var collaborators = JSON.parse(output);
+				} catch (e) {
+					console.log('Invalid json', output);
+					should(e).not.be.ok;
+				}
 				collaborators.should.be.instanceof(Array);
 				collaborators.length.should.eql(1);
 				collaborators[0].username.should.eql('homer');
@@ -148,5 +160,88 @@ describe('Integration', function () {
 			testDone();
 		});
 	});
+
+	it('should login again', function (testDone) {
+
+		exec('datanow login --username homer --email glen+homer@datanow.io --password password1', function (err, output) {
+			var configPath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + '/.datanow-config.json';
+			var config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+			config.token.should.be.object;
+			config.token.token.should.be.ok;
+			authToken = config.token.token;
+			testDone(err);
+		});
+	});
+
+	it('should create board token', function (testDone) {
+
+		exec('datanow tokens --create --appName unit-test admin', function (err, output) {
+			var out = JSON.parse(output);
+			should(out).be.instanceOf(Object);
+			out.appName.should.eql('unit-test');
+			out.scopes.should.eql(['admin']);
+			createToken = out;
+			testDone(err);
+		});
+	});
+
+	it('should have 1 board token', function (testDone) {
+
+		exec('datanow tokens --list', function (err, output) {
+			var out = JSON.parse(output);
+			should(out).be.instanceOf(Array);
+			out.length.should.eql(1);
+			testDone(err);
+		});
+	});
+
+	it('should fail creating a token using the board token', function (testDone) {
+
+		exec('datanow tokens --create --appName fail-test --token ' + createToken.token + 'create ', function (err, output) {
+			should(err).be.ok;
+			testDone();
+		});
+	});
+
+	it('should write data using the board token', function (testDone) {
+
+		exec('datanow write --token ' + createToken.token + ' 9', function (err, output) {
+			testDone(err);
+		});
+	});
+
+	it('should update board token', function (testDone) {
+
+		exec('datanow tokens --update ' + createToken.id + ' --appName unit-test-two create read', function (err, output) {
+			try {
+				var out = JSON.parse(output);
+			} catch (e) {
+				console.log('Invalid json', output);
+				should(e).not.be.ok;
+			}
+			should(out).be.instanceOf(Object);
+			out.appName.should.eql('unit-test-two');
+			out.scopes.should.eql(['create', 'read']);
+			testDone(err);
+		});
+	});
+
+	it('should delete board token', function (testDone) {
+
+		exec('datanow tokens --delete ' + createToken.id, function (err, output) {
+			testDone(err);
+		});
+	});
+
+	it('should have 0 board token', function (testDone) {
+
+		exec('datanow tokens --list', function (err, output) {
+			var out = JSON.parse(output);
+			should(out).be.instanceOf(Array);
+			out.length.should.eql(0);
+			testDone(err);
+		});
+	});
+
 
 });

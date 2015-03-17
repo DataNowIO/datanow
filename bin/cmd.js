@@ -199,7 +199,7 @@ program
 		} else if (options.remove) {
 			dataNow.removeCollaborator(namespace, options.remove, helper.genericResponse);
 		} else {
-			dataNow.getCollaborators(namespace, helper.genericListResponse);
+			dataNow.getCollaborators(namespace, helper.genericJsonResponse);
 		}
 
 	});
@@ -250,13 +250,13 @@ program
 		dataNow = new DataNow(config);
 
 		if (options.create) {
-			dataNow.createToken(options.board, scopes, options, helper.genericListResponse);
+			dataNow.createToken(options.board, scopes, options, helper.genericJsonResponse);
 		} else if (options.delete) {
 			dataNow.deleteToken(options.board, options.delete, helper.genericResponse);
 		} else if (options.update) {
-			dataNow.updateToken(options.board, options.update, scopes, options, helper.genericResponse);
+			dataNow.updateToken(options.board, options.update, scopes, options, helper.genericJsonResponse);
 		} else {
-			dataNow.getTokens(options.board, helper.genericListResponse);
+			dataNow.getTokens(options.board, helper.genericJsonResponse);
 		}
 
 	});

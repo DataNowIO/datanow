@@ -10,7 +10,7 @@ var helper = module.exports = {
 		log.debug('Success.');
 	},
 
-	genericListResponse: function (err, response) {
+	genericJsonResponse: function (err, response) {
 		if (err) {
 			return helper.genericError(err);
 		}

@@ -53,6 +53,7 @@ function DataNow(opts) {
 
 	if (self.options.token) {
 		var token = self.options.token.token ? self.options.token.token : self.options.token;
+		log.debug('Using token', self.options.token, token);
 		request = Request.defaults({
 			auth: {
 				bearer: token
@@ -309,8 +310,8 @@ DataNow.prototype = {
 		if (scopes.length > 0) {
 			body.scopes = scopes;
 		}
-		if (options.name) {
-			body.appName = options.name;
+		if (options.appName) {
+			body.appName = options.appName;
 		}
 		request.post(self.buildUrl(namespace) + '/authorizations/' + tokenId, {
 			json: body
